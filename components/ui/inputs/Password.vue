@@ -7,6 +7,8 @@
         :value="modelValue"
         @input="validateInput"
         :class="{ 'input-error': showError, 'input-focus': !showError }"
+        class="cutome-input"
+        :disabled="disabled"
       />
       <svg
         width="24"
@@ -67,6 +69,8 @@ defineProps<{
   label?: string;
   isConfirmPassword?: boolean;
   password?: string; // Receive the main password value from parent if isConfirmPassword is true
+  disabled?: Boolean;
+
 }>();
 
 // Emits definition

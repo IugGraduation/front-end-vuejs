@@ -4,15 +4,24 @@
       <v-col cols="auto">
         <h2>Categories</h2>
       </v-col>
-      <v-col cols="auto">
+      <v-col cols="auto" v-show="!isLoading">
         <button @click="toggleSeeAll" class="see-all-btn" color="primary">
           {{ showAll ? "See Less" : "See All" }}
         </button>
       </v-col>
     </v-row>
 
-    <v-row>
+    <v-row v-if="isLoading">
+      <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">
+        <v-skeleton-loader
+          class="border w-full rounded-xl overflow-hidden"
+          type="image"
+        ></v-skeleton-loader>
+      </v-col>
+    </v-row>
+    <v-row v-else>
       <!-- Show categories based on showAll state -->
+
       <v-col
         v-for="(category, index) in visibleCategories"
         :key="index"
@@ -36,22 +45,15 @@
 <script setup>
 import { ref, computed } from "vue";
 import categoryCard from "../ui/cards/CategoryCard.vue";
+import { useCategoryStore } from "@/stores/categories";
 
-// Define an array of categories
-const categories = [
-  { image: "https://picsum.photos/500/300?image=232", title: "Category 1" },
-  { image: "https://picsum.photos/500/300?image=233", title: "Category 2" },
-  { image: "https://picsum.photos/500/300?image=234", title: "Category 3" },
-  { image: "https://picsum.photos/500/300?image=235", title: "Category 4" },
-  { image: "https://picsum.photos/500/300?image=236", title: "Category 5" },
-  { image: "https://picsum.photos/500/300?image=237", title: "Category 6" },
-  { image: "https://picsum.photos/500/300?image=238", title: "Category 7" },
-  { image: "https://picsum.photos/500/300?image=239", title: "Category 8" },
-  { image: "https://picsum.photos/500/300?image=240", title: "Category 9" },
-  { image: "https://picsum.photos/500/300?image=241", title: "Category 10" },
-  { image: "https://picsum.photos/500/300?image=242", title: "Category 11" },
-  { image: "https://picsum.photos/500/300?image=243", title: "Category 12" },
-];
+const categoryStore = useCategoryStore();
+
+await categoryStore.fetchCategories();
+
+const isLoading = ref < Boolean > true;
+
+const categories = categoryStore.categories;
 
 // Reactive state for toggling 'See All'
 const showAll = ref(false);
@@ -66,9 +68,7 @@ function toggleSeeAll() {
   showAll.value = !showAll.value;
 }
 
-definePageMeta({
-  layout: "default",
-});
+
 </script>
 
 <style scoped>

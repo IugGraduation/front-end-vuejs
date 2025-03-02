@@ -48,7 +48,7 @@ a {
 .v-feild {
   display: ruby !important;
 }
-input,
+.cutome-input,
 textarea {
   font-size: 14px !important;
   font-weight: 400 !important;
@@ -57,9 +57,9 @@ textarea {
   width: 100%;
   padding: 18px;
   padding-left: 44px;
-  border: 1px solid rgb(var(--v-theme-blackTeriary));
+  /* border: 1px solid rgb(var(--v-theme-blackTeriary)); */
   outline: none rgb(var(--v-theme-secondary));
-  background-color: rgb(var(--v-theme-white)) !important;
+  background-color: rgb(var(--v-theme-inputBackground)) !important;
   transition: border-color 0.3s ease, outline 0.3s ease;
 }
 
@@ -117,4 +117,11 @@ input::placeholder {
 
 .v-select .v-field .v-field__input > input {
   display: none;
+}
+
+.logo {
+  font-family: "Send Flowers", sans-serif;
+  font-weight: bold;
+  font-size: 40px;
+  color: rgb(var(--v-theme-primary));
 }

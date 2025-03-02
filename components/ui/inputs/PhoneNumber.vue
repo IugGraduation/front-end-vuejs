@@ -1,12 +1,14 @@
 <template>
   <div class="input-wrap">
-    <div class="input-container" :class="[{ rtl: isRtl, 'mb-5': !showError }]">
+    <div class="input-container" :class="{ rtl: isRtl, 'mb-5': !showError }">
       <input
         type="text"
         :placeholder="$t('phoneNumber')"
         :value="modelValue"
         @input="validateInput"
         :class="{ 'input-error': showError, 'input-focus': !showError }"
+        class="cutome-input"
+        :disabled="isDisabled"
       />
       <svg
         class="icon"
@@ -27,14 +29,22 @@
     <span v-if="showError" class="error-message">{{ errorMessage }}</span>
   </div>
 </template>
+
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 // Props definition
-const props = defineProps<{
-  modelValue: string;
-}>();
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: true,
+  },
+  disabled: {
+    type: Boolean,
+    required: true,
+  },
+});
 
 // Emits definition
 const emit = defineEmits<{
@@ -42,11 +52,20 @@ const emit = defineEmits<{
   (event: "validationError", errorMessage: string): void;
 }>();
 
+const isDisabled = ref(props.disabled);
 const showError = ref(false);
 const errorMessage = ref("");
 
+// Watch for changes in the `disabled` prop
+watch(
+  () => props.disabled,
+  (newValue) => {
+    isDisabled.value = newValue;
+  }
+);
+
 // Regular expression for phone number validation
-const phoneNumberPattern = /^(?:\+)?(972|970)(59|56)\d{7}$/;
+const phoneNumberPattern = /^(059|056)\d{7}$/;
 
 const validateInput = (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -56,7 +75,7 @@ const validateInput = (event: Event) => {
   if (!phoneNumberPattern.test(value)) {
     showError.value = true;
     errorMessage.value =
-      "Please enter a valid phone number, including the country code (+972 or +970)";
+      "Please enter a valid phone number, start with (059 or 056)";
     emit("validationError", errorMessage.value);
   } else {
     showError.value = false;
@@ -76,6 +95,7 @@ const isRtl = computed(() => {
   return rtlLanguages.includes(locale.value);
 });
 </script>
+
 <style scoped>
 svg path {
   stroke: rgb(var(--v-theme-blackTeriary));

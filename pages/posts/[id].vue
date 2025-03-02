@@ -3,7 +3,12 @@
     <v-container>
       <h1>Post Details</h1>
       <template v-if="imagesLoaded">
-        <v-carousel height="400" hide-delimiter-background show-arrows>
+        <v-carousel
+          height="400"
+          hide-delimiter-background
+          show-arrows
+          v-if="post.images"
+        >
           <template v-slot:prev="{ props }">
             <v-btn variant="flat" @click="props.onClick"
               ><svg
@@ -32,24 +37,25 @@
               </svg>
             </v-btn>
           </template>
-          <v-carousel-item v-for="i in 9" :key="i">
-            <v-img
-              class="mx-auto"
-              width="500"
-              :src="`https://picsum.photos/700/500?image=${232 + i}`"
-            />
+
+          <v-carousel-item v-for="image in post.images" :key="image">
+            <v-img class="mx-auto" width="auto" height="700" :src="image" />
           </v-carousel-item>
         </v-carousel>
+        <v-img
+          v-if="!post.images"
+          class="mx-auto"
+          width="auto"
+          height="700"
+          :src="post.image"
+        />
       </template>
       <div class="card__avatar-data">
         <div class="avatar-section">
           <v-avatar size="44">
-            <v-img
-              alt="John"
-              src="https://randomuser.me/api/portraits/men/1.jpg"
-            ></v-img>
+            <v-img :alt="post.name" :src="post.avatarUrl"></v-img>
           </v-avatar>
-          <h5 class="avatar-name">Username</h5>
+          <h5 class="avatar-name">{{ post.name }}</h5>
         </div>
         <div class="date-section">
           <v-chip>
@@ -101,44 +107,46 @@
         <!-- Offers and Status Section -->
         <div class="offers-status">
           <div class="offers">
-            <h5 class="offers-numbers">22</h5>
+            <h5 class="offers-numbers">
+              {{ post.offers ? post.offers.length : "0" }}
+            </h5>
             <p>Offers</p>
           </div>
           <div class="status">
-            <h5>Open</h5>
+            <h5>{{ post.status }}</h5>
             <p>Status</p>
           </div>
         </div>
 
         <!-- Title Section -->
         <div class="title">
-          <h3>Brand New Microwave for Exchange</h3>
+          <h3>{{ post.title }}</h3>
         </div>
 
         <!-- Details Section -->
         <div class="details mx-auto">
           <p>
-            I have a brand new microwave in excellent condition that I’d like to
-            trade for something equally valuable. It’s perfect for quick meals
-            or reheating food and has never been used!
+            {{ post.description }}
           </p>
         </div>
 
         <!-- Favorite Categories -->
         <div class="favorite-categories">
           <ul>
-            <li><v-chip>Food & Beverages</v-chip></li>
-            <li><v-chip>Sports & Outdoors</v-chip></li>
-            <li><v-chip>Health & Beauty</v-chip></li>
+            <li v-for="category in post.categories" :key="category">
+              <v-chip>{{ category }}</v-chip>
+            </li>
           </ul>
         </div>
 
         <!-- Offers Section -->
         <v-row class="mb-16">
           <!-- Show Posts based on showAll state -->
+
           <v-col
-            v-for="index in 9"
-            :key="index"
+            v-if="post.offers"
+            v-for="offer in post.offers"
+            :key="offer.id"
             cols="12"
             sm="6"
             md="4"
@@ -147,18 +155,18 @@
             class="post-card-wrapper"
           >
             <OfferCard
-              :index="index"
-              imageUrl="https://picsum.photos/500/300?image=232"
-              avatarUrl="https://randomuser.me/api/portraits/men/1.jpg"
-              name="John Doe"
-              title="Software Engineer"
-              description="A passionate software engineer with 5+ years of experience."
+              :index="offer.id"
+              :imageUrl="offer.imageUrl"
+              :avatarUrl="offer.avatarUrl"
+              :name="offer.name"
+              :title="offer.title"
+              :description="offer.description"
           /></v-col>
         </v-row>
 
         <!-- Add Offer Button -->
         <div class="add-offer-button">
-          <NuxtLink to="/offer/1">
+          <NuxtLink :to="`/offer/${post.id}`">
             <PrimaryBtn class="py-3 px-7 w-100">Add Offer</PrimaryBtn>
           </NuxtLink>
         </div>
@@ -172,13 +180,19 @@ import { useRoute } from "vue-router";
 import { onMounted, ref } from "vue";
 import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
 import OfferCard from "../../components/ui/cards/OfferCard.vue";
+import { usePostStore } from "@/stores/posts";
 // Access the current route
 const route = useRoute();
+const postsStore = usePostStore();
 
 const imagesLoaded = ref<boolean>(false);
+const postHasImages = ref<boolean>(false);
 
-onMounted(() => {
+const post = ref({});
+onMounted(async () => {
+
   imagesLoaded.value = true;
+  post.value = await postsStore.fetchOnePost(route.params.id);
 });
 // Define an array of colors
 const colors = ref<string[]>([

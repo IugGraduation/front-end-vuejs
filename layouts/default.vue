@@ -6,11 +6,12 @@
   <v-btn @click="logout">logout</v-btn>
   <br />
   {{ $t("welcome") }} -->
-  <v-layout>
+  <v-layout class="d-block">
     <mainNav />
-    <v-main>
+    <v-main style="min-height: calc(100vh - 60px)">
       <NuxtPage />
     </v-main>
+    <mainFooter />
   </v-layout>
 </template>
 
@@ -20,7 +21,7 @@ import { useI18n } from "vue-i18n";
 import { onBeforeMount } from "vue";
 import { useAuthStore } from "../stores/auth";
 import mainNav from "../components/ui/nav/index.vue";
-
+import mainFooter from "@/components/ui/footer/index.vue";
 // Set up vuetify theme and i18n
 const theme = useTheme();
 const i18n = useI18n();

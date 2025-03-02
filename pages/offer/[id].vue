@@ -4,7 +4,7 @@
 
     <!-- Drag and Drop Area -->
     <div
-      class="drag-drop-area"
+      class="drag-drop-area py-10 mt-5"
       @dragover.prevent
       @drop.prevent="handleDrop"
       @click="triggerFileInput"
@@ -51,15 +51,21 @@
         label="Categories"
         chips
         multiple
-        variant="solo"
+        variant="outlined"
+        selection-type="checkbox"
       ></v-select>
+
+      <!-- <v-icon :icon="mdiAccount" /> -->
+
       <div class="w-full text-center">
-        <PrimaryBtn @click="submitForm" class="px-7 py-3">Add Offer</PrimaryBtn>
+        <PrimaryBtn class="px-7 py-3">Add Offer</PrimaryBtn>
       </div>
     </v-form>
   </v-container>
 </template>
 <script setup lang="ts">
+import { mdiAccount, mdiArrowLeft } from "@mdi/js";
+
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
@@ -68,9 +74,12 @@ import TextArea from "../../components/ui/inputs/TextArea.vue";
 import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
 import { useToast } from "vue-toast-notification";
 import { navigateTo } from "nuxt/app";
+import { usePostStore } from "@/stores/posts";
+
 // Access the current route
 const route = useRoute();
 const toast = useToast();
+const postStore = usePostStore();
 // Reactive Data
 const title = ref<string>("");
 const titleError = ref<string>("");
@@ -164,9 +173,14 @@ const addOffer = () => {
     toast.error("some inputs rqurired");
   } else {
     toast.success("success");
-    console.log("Form is valid. Submission successful!");
-    navigateTo("/posts/1");
+
+    navigateTo("/posts/" + route.params.id);
     console.log({
+      title: title.value,
+      description: description.value,
+      categories: selectedCategory.value,
+    });
+    postStore.addOfferToPost(route.params.id, {
       title: title.value,
       description: description.value,
       categories: selectedCategory.value,

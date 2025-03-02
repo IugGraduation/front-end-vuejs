@@ -7,6 +7,8 @@
         :value="modelValue"
         @input="validateInput"
         :class="{ 'input-error': showError, 'input-focus': !showError }"
+        class="cutome-input"
+        :disabled="disabled"
       />
       <svg
         width="24"
@@ -38,6 +40,7 @@ import { useI18n } from "vue-i18n";
 // Props definition
 defineProps<{
   modelValue: string;
+  disabled: Boolean;
 }>();
 
 // Emits definition

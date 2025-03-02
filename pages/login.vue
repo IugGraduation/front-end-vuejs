@@ -37,6 +37,7 @@ const handleLogin = async (): Promise<void> => {
 
   // التحقق من الأخطاء
   if (phoneError.value || passwordError.value) {
+    toast.error(`${phoneError.value} , ${passwordError.value}`);
     toast.error("Please fix the errors before logging in.");
     return;
   }

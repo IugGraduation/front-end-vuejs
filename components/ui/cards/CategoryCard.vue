@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink :to="`/search`">
+  <NuxtLink :to="`/search?category=${encodeURIComponent(title)}`">
     <div class="card">
       <v-img :src="image" alt="Card Image" class="card_image" />
       <span class="card_title">{{ title }} </span>

@@ -2,7 +2,7 @@
   <v-container>
     <v-row class="d-flex justify-space-between">
       <v-col cols="auto">
-        <h2>Posts</h2>
+        <h2>My Posts</h2>
       </v-col>
     </v-row>
     <v-row v-if="isLoading">
@@ -16,7 +16,7 @@
     <v-row v-else>
       <!-- Show Posts based on showAll state -->
       <v-col
-        v-for="(post, index) in visiblePosts"
+        v-for="post in visiblePosts"
         :key="post.id"
         cols="12"
         sm="6"
@@ -34,6 +34,7 @@
           :status="post.status"
           :description="post.description"
           :offers="post.offers ? post.offers.length : 0"
+          :isMyPost="true"
         />
       </v-col>
     </v-row>
@@ -45,9 +46,10 @@ import { ref, computed, onMounted } from "vue";
 import PostCard from "../ui/cards/PostCard.vue";
 import PrimaryBtn from "../ui/buttons/PrimaryBtn.vue";
 import { usePostStore } from "@/stores/posts";
+import { useAuthStore } from "@/stores/auth";
 // Define an array of Posts
 const postsStore = usePostStore();
-
+const authStore = useAuthStore();
 // defineProps({
 //   isLoading: {
 //     type: Boolean,
@@ -61,7 +63,7 @@ onMounted(async () => {
 });
 const fetchPosts = async () => {
   try {
-    posts.value = await postsStore.fetchPosts();
+    posts.value = await postsStore.fetcMyhPosts(authStore.user.id);
     isLoading.value = false;
   } catch (error) {
     console.error(error);

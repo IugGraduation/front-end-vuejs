@@ -51,7 +51,7 @@
         label="Categories"
         chips
         multiple
-        variant="solo"
+        variant="outlined"
       ></v-select>
       <div class="w-full text-center d-flex gap-3 justify-space-around">
         <PrimaryBtn @click="submitForm" class="px-4 py-3 w-25">Save</PrimaryBtn>
@@ -168,7 +168,6 @@ const addOffer = () => {
     toast.error("some inputs rqurired");
   } else {
     toast.success("success");
-    console.log("Form is valid. Submission successful!");
     navigateTo("/posts/1");
     console.log({
       title: title.value,

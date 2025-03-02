@@ -1,14 +1,14 @@
 <template>
   <v-container>
-    <div class="d-flex justify-space-between items-center">
+    <div class="d-flex justify-space-between align-center">
       <h1>Edit Offer</h1>
       <div class="status">
         <v-switch
           color="primary"
           v-model="status"
-          :label="status ? 'open' : 'close'"
-        ></v-switch>
-      </div>
+          ></v-switch>
+          <!-- :label="status ? 'open' : 'close'" -->
+        </div>
     </div>
 
     <!-- Drag and Drop Area -->
@@ -47,7 +47,7 @@
     />
 
     <!-- Form Inputs -->
-    <v-form @submit.prevent="editOffer">
+    <v-form @submit.prevent>
       <Title v-model="title" @validationError="handleTitleError" />
       <TextArea
         v-model="description"
@@ -56,42 +56,47 @@
       <PestBeterSpo v-model="place" @validationError="handlePlaceError" />
       <v-select
         :items="categories"
-        v-model="selectedCategory"
+        v-model="postCategories"
         label="Categories Of Your Post"
         chips
         multiple
-        variant="solo"
+        variant="outlined"
       ></v-select>
       <v-select
         :items="categories"
-        v-model="selectedCategory"
+        v-model="categoriesWant"
         label="Categories You Like"
         chips
         multiple
-        variant="solo"
+        variant="outlined"
       ></v-select>
       <div class="w-full text-center d-flex gap-3 justify-space-around">
-        <PrimaryBtn @click="submitForm" class="px-4 py-3 w-25">Save</PrimaryBtn>
-        <OutLineBtn @click="submitForm" class="px-4 py-3 w-25">
-          Delete
+        <PrimaryBtn @click="savePost" class="px-4 py-3 w-25">Save</PrimaryBtn>
+        <OutLineBtn @click="OnDeletPost" class="px-4 py-3 w-25">
+          Delete Post
         </OutLineBtn>
       </div>
     </v-form>
   </v-container>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
-import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
-import OutLineBtn from "../../components/ui/buttons/OutLineBtn.vue";
+import PrimaryBtn from "@/components/ui/buttons/PrimaryBtn.vue";
+import OutLineBtn from "@/components/ui/buttons/OutLineBtn.vue";
 import Title from "../../components/ui/inputs/Title.vue";
 import TextArea from "../../components/ui/inputs/TextArea.vue";
 import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
 import { useToast } from "vue-toast-notification";
 import { navigateTo } from "nuxt/app";
+import { useCategoryStore } from "@/stores/categories";
+import { usePostStore } from "@/stores/posts";
+
 // Access the current route
 const route = useRoute();
 const toast = useToast();
+const categoryStore = useCategoryStore();
+const postsStore = usePostStore();
 // Reactive Data
 const status = ref<boolean>(true);
 const title = ref<string>("");
@@ -100,11 +105,30 @@ const description = ref<string>("");
 const descriptionError = ref<string>("");
 const place = ref<string>("");
 const placeError = ref<string>("");
-const categories = ref(["Category 1", "Category 2", "Category 3"]);
-const selectedCategory = ref(["Category 1"]);
+const categories = ref<string[]>([]);
+const postCategories = ref<string[]>([]);
+const categoriesWant = ref<string[]>([]);
 const images = ref<{ file: File; url: string }[]>([]);
 const valid = ref(false); // Form validation state
+const postData = reactive({});
+onMounted(() => {
+  categories.value = categoryStore.categories;
+});
 
+onMounted(async () => {
+  postData.value = await postsStore.fetchOneMyPost(route.params.id);
+  title.value = postData.value.title;
+  description.value = postData.value.description;
+  images.value = postData.value.images;
+  categoriesWant.value = postData.value.categoriesWant;
+  postCategories.value = postData.value.postCategories;
+  place.value = postData.value.pestPlace;
+  if (postData.value.status == "open") {
+    status.value = true;
+  } else {
+    status.value = false;
+  }
+});
 // Validation Errors
 const validationErrors = ref<string[]>([]);
 
@@ -158,7 +182,7 @@ const resetFileInput = () => {
 };
 
 // Form Submission
-const editOffer = () => {
+const savePost = () => {
   // Reset previous errors
   validationErrors.value = [];
 
@@ -186,14 +210,35 @@ const editOffer = () => {
     toast.error("some inputs rqurired");
   } else {
     toast.success("success");
-    console.log("Form is valid. Submission successful!");
-    navigateTo("/posts/1");
+    navigateTo("/profile");
     console.log({
       title: title.value,
       description: description.value,
-      categories: selectedCategory.value,
-      images: images.value.map((image) => image.file.name),
+      images: images.value,
+      categoriesWant: categoriesWant.value,
+      postCategories: postCategories.value,
+      place: place.value,
     });
+
+    postsStore.editPost(postData.value.id, {
+      title: title.value,
+      description: description.value,
+      images: images.value,
+      categoriesWant: categoriesWant.value,
+      postCategories: postCategories.value,
+      place: place.value,
+    });
+  }
+};
+
+const OnDeletPost = async () => {
+  console.log("delete", postData.value.id);
+
+  await postsStore.deletePost(postData.value.id);
+  try {
+    navigateTo("/profile");
+  } catch (error) {
+    console.error("note delte");
   }
 };
 </script>

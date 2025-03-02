@@ -1,8 +1,20 @@
 <template>
-  <button type="submit"><slot></slot></button>
+  <button
+    type="submit"
+    :disabled="isDisabled"
+  >
+    <slot></slot>
+  </button>
 </template>
 
-<script></script>
+<script setup lang="ts">
+defineProps({
+  isDisabled: {
+    type: Boolean,
+    requierd: false,
+  },
+});
+</script>
 
 <style scoped>
 button {
@@ -11,5 +23,6 @@ button {
   color: rgb(var(--v-theme-white));
   border-radius: 16px;
   cursor: pointer;
+  
 }
 </style>

@@ -1,34 +1,61 @@
 <template>
   <v-container>
     <div class="">
-      <div class="search d-flex align-center justify-space-between">
-        <div class="w-50">
-          <input type="text" v-model="serchText" placeholder="search" />
+      <div class="search d-flex align-start justify-space-between">
+        <div class="w-75">
+          <SearchInput v-model="searchText" />
         </div>
-        <div class="serach_filters w-25 mt-5">
-          <v-select
-            :items="filters"
+        <div class="serach_filters w-25 mt-4">
+          <CustomDropDownMenu
+            :options="filters"
+            placeholder="Select an option"
+            @select="handleSelect"
             v-model="selectedFilter"
-            label="filter"
-            chips
-            multiple
-            variant="solo"
-          ></v-select>
+          />
         </div>
       </div>
     </div>
   </v-container>
 </template>
+<script setup>
+import { onMounted, ref, computed, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useCategoryStore } from "@/stores/categories";
+import SearchInput from "../components/ui/inputs/SearchInput.vue";
+import CustomDropDownMenu from "@/components/ui/inputs/CustomDropdown.vue";
 
-<script setup lang="ts">
-import { ref } from "vue";
-const serchText = ref<String>("");
-const filters = ref<String[]>(["date", "date1", "date2", "date3 "]);
+const categoryStore = useCategoryStore();
+const route = useRoute();
 const selectedFilter = ref([]);
-</script>
 
-<style scoped>
-.search_input input {
-  width: 800px;
-}
-</style>
+// Computed list of filter options
+const filters = computed(() =>
+  categoryStore.categories.map((category) => category.title)
+);
+
+// Handle option selection
+const handleSelect = (option) => {
+  console.log("Selected option:", option);
+};
+
+// Watch for changes in route query and update selectedFilter
+watch(
+  () => route.query.category,
+  (newCategory) => {
+    if (newCategory) {
+      selectedFilter.value = [newCategory];
+    }
+  },
+  { immediate: true }
+);
+
+// Initialize selectedFilter on page load
+onMounted(() => {
+  if (route.query.category) {
+    
+    selectedFilter.value = [route.query.category];
+    console.log(route.query.category , selectedFilter.value );
+  
+  }
+});
+</script>

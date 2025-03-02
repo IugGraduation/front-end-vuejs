@@ -7,6 +7,8 @@
         :value="modelValue"
         @input="validateInput"
         :class="[{ 'input-error': showError, 'input-focus': !showError }]"
+        class="cutome-input"
+        :disabled="disabled"
       />
       <svg
         width="24"
@@ -32,11 +34,12 @@
 <script lang="ts" setup>
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n"; // Import useI18n
-import { useRtl } from '../composables/useRtl';  // Import the composable
+import { useRtl } from "../composables/useRtl"; // Import the composable
 
 // Props definition
 defineProps<{
   modelValue: string;
+  disabled: Boolean;
 }>();
 
 // Emits definition
@@ -69,8 +72,6 @@ const validateInput = (event: Event) => {
 
   emit("update:modelValue", value);
 };
-
-
 </script>
 
 <style scoped>

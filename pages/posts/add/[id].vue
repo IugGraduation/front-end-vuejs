@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1>Add Offer</h1>
+    <h1>Add Posts</h1>
 
     <!-- Drag and Drop Area -->
     <div
@@ -47,19 +47,19 @@
       <PestBeterSpo v-model="place" @validationError="handlePlaceError" />
       <v-select
         :items="categories"
-        v-model="selectedCategory"
+        v-model="postCategories"
         label="Categories Of Your Post"
         chips
         multiple
-        variant="solo"
+        variant="outlined"
       ></v-select>
       <v-select
         :items="categories"
-        v-model="selectedCategory"
+        v-model="categoriesWant"
         label="Categories You Like"
         chips
         multiple
-        variant="solo"
+        variant="outlined"
       ></v-select>
       <div class="w-full text-center">
         <PrimaryBtn @click="submitForm" class="px-7 py-3">Add Offer</PrimaryBtn>
@@ -68,7 +68,7 @@
   </v-container>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
 import Title from "../../components/ui/inputs/Title.vue";
@@ -76,9 +76,13 @@ import TextArea from "../../components/ui/inputs/TextArea.vue";
 import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
 import { useToast } from "vue-toast-notification";
 import { navigateTo } from "nuxt/app";
+import { useCategoryStore } from "@/stores/categories";
+import { usePostStore } from "@/stores/posts";
 // Access the current route
 const route = useRoute();
 const toast = useToast();
+const categoryStore = useCategoryStore();
+const postStore = usePostStore();
 // Reactive Data
 const title = ref<string>("");
 const titleError = ref<string>("");
@@ -87,13 +91,17 @@ const descriptionError = ref<string>("");
 const place = ref<string>("");
 const placeError = ref<string>("");
 const categories = ref(["Category 1", "Category 2", "Category 3"]);
-const selectedCategory = ref(["Category 1"]);
+const postCategories = ref([]);
+const categoriesWant = ref([]);
 const images = ref<{ file: File; url: string }[]>([]);
 const valid = ref(false); // Form validation state
 
 // Validation Errors
 const validationErrors = ref<string[]>([]);
 
+onMounted( () => {
+  categories.value = categoryStore.categories;
+});
 // Rules for validation
 const rules = {
   required: (value: string) => !!value || "This field is required",
@@ -144,7 +152,7 @@ const resetFileInput = () => {
 };
 
 // Form Submission
-const addOffer = () => {
+const addOffer = async () => {
   // Reset previous errors
   validationErrors.value = [];
 
@@ -172,12 +180,21 @@ const addOffer = () => {
     toast.error("some inputs rqurired");
   } else {
     toast.success("success");
-    console.log("Form is valid. Submission successful!");
-    navigateTo("/posts/1");
+    console.log("Added successful!");
+    navigateTo("/profile");
+    await postStore.addPost({
+      title: title.value,
+      description: description.value,
+      PostCategories: postCategories.value,
+      categoriesWant: categoriesWant.value,
+      pestPlace: place.value,
+      images: images.value.map((image) => image.file.name),
+    });
     console.log({
       title: title.value,
       description: description.value,
-      categories: selectedCategory.value,
+      PostCategories: postCategories.value,
+      categoriesWant: categoriesWant.value,
       images: images.value.map((image) => image.file.name),
     });
   }

@@ -24,4 +24,10 @@ export default {
   category: "Category",
   home: "Home",
   aboutUs: "About Us",
+  search: "Search",
+  addPost:"Add Post",
+  editPost:"Edit Post",
+  deletePost:"Delete Post",
+  addOffer:"Delete Offer",
+  editOffer:"Edit Offer",
 };

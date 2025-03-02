@@ -12,7 +12,7 @@
         </v-avatar>
         <h5 class="avtar_name">{{ name }}</h5>
       </div>
-      <div class="status">
+      <div class="status" :class="status == 'open' ? 'open' : 'close'">
         <span>{{ status }}</span>
       </div>
     </div>
@@ -67,7 +67,7 @@
               />
             </svg>
           </div>
-          <span class="offers_number">6 Offers</span>
+          <span class="offers_number">{{ offers }} Offers</span>
         </div>
       </div>
       <p class="description_offer mt-2">{{ descriptionFirstEightWords }}</p>
@@ -117,13 +117,24 @@
         <span> Make Your Offer </span>
       </button>
     </NuxtLink>
-    <div v-if="isHovered" class="overlay">
-      <NuxtLink :to="`/posts/${index}`">
-        <button class="create_offer">
-          <span> Add Your Offer </span>
-        </button>
-      </NuxtLink>
-    </div>
+    <template v-if="!isMyPost">
+      <div v-if="isHovered" class="overlay">
+        <NuxtLink :to="`/posts/${index}`">
+          <button class="create_offer">
+            <span> Add Your Offer </span>
+          </button>
+        </NuxtLink>
+      </div>
+    </template>
+    <template v-else>
+      <div v-if="isHovered" class="overlay">
+        <NuxtLink :to="`/posts/edit/${index}`">
+          <button class="create_offer">
+            <span> Edit My Post </span>
+          </button>
+        </NuxtLink>
+      </div>
+    </template>
   </div>
 </template>
 <script lang="ts" setup>
@@ -138,10 +149,15 @@ const props = defineProps<{
   status: string;
   description: string;
   index: number;
+  offers: string;
+  isMyPost: boolean;
 }>();
 
 // Computed property to get the first 3 words of the title
 const titleFirstThreeWords = computed(() => {
+  if (!props.title) {
+    return;
+  }
   if (props.title.split(" ").length > 3) {
     return props.title.split(" ").slice(0, 3).join(" ") + "...";
   }
@@ -150,6 +166,9 @@ const titleFirstThreeWords = computed(() => {
 
 // Computed property to get the first 8 words of the description
 const descriptionFirstEightWords = computed(() => {
+  if (!props.description) {
+    return;
+  }
   if (props.description.split(" ").length > 10) {
     return props.description.split(" ").slice(0, 10).join(" ") + "...";
   }
@@ -265,11 +284,20 @@ const isHovered = ref(false);
   margin-top: 2px;
   padding: 2px 8px;
   border-radius: 16px;
-  background: #8fe3007a;
 }
 .card .status span {
-  color: #8fe300;
   font-size: 14px;
+}
+.card .status.open {
+  background: #8fe3007a;
+}
+.card .status.open span {
+  color: white;
+}
+.card .status.close {
+  background: #ff05057a;
+}
+.card .status.close span {
   color: white;
 }
 

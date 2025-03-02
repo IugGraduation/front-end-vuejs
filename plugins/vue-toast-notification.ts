@@ -8,4 +8,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     duration: 3000, // duration in milliseconds
     dismissible: true, // whether the toast can be dismissed
   });
+  const style = document.createElement("style");
+  style.innerHTML = `
+    .v-toast__text {
+      color: white !important;
+    }
+  `;
+  document.head.appendChild(style);
 });
