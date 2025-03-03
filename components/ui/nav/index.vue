@@ -29,27 +29,27 @@
 
     <!-- Spacer to push the items to the right side -->
     <v-spacer></v-spacer>
-    <NuxtLink :to="`/search`">
-      <v-btn>
-        <svg
-          width="25"
-          height="25"
-          viewBox="0 0 25 25"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M12.1 3.25C7.26748 3.25 3.34998 7.16751 3.34998 12C3.34998 16.8325 7.26748 20.75 12.1 20.75C16.9325 20.75 20.85 16.8325 20.85 12C20.85 7.16751 16.9325 3.25 12.1 3.25ZM1.84998 12C1.84998 6.33908 6.43906 1.75 12.1 1.75C17.7609 1.75 22.35 6.33908 22.35 12C22.35 14.5605 21.4111 16.9017 19.8588 18.6982L23.1303 21.9697C23.4232 22.2626 23.4232 22.7374 23.1303 23.0303C22.8374 23.3232 22.3625 23.3232 22.0696 23.0303L18.7982 19.7589C17.0017 21.3111 14.6605 22.25 12.1 22.25C6.43906 22.25 1.84998 17.6609 1.84998 12Z"
-            fill="black"
-            fill-opacity="0.48"
-          />
-        </svg>
-      </v-btn>
-    </NuxtLink>
     <!-- User, Dark/Light, and Language Toggle -->
     <div class="d-flex align-center gap-3">
+      <NuxtLink :to="`/search`">
+        <v-btn>
+          <svg
+            width="25"
+            height="25"
+            viewBox="0 0 25 25"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12.1 3.25C7.26748 3.25 3.34998 7.16751 3.34998 12C3.34998 16.8325 7.26748 20.75 12.1 20.75C16.9325 20.75 20.85 16.8325 20.85 12C20.85 7.16751 16.9325 3.25 12.1 3.25ZM1.84998 12C1.84998 6.33908 6.43906 1.75 12.1 1.75C17.7609 1.75 22.35 6.33908 22.35 12C22.35 14.5605 21.4111 16.9017 19.8588 18.6982L23.1303 21.9697C23.4232 22.2626 23.4232 22.7374 23.1303 23.0303C22.8374 23.3232 22.3625 23.3232 22.0696 23.0303L18.7982 19.7589C17.0017 21.3111 14.6605 22.25 12.1 22.25C6.43906 22.25 1.84998 17.6609 1.84998 12Z"
+              fill="black"
+              fill-opacity="0.48"
+            />
+          </svg>
+        </v-btn>
+      </NuxtLink>
       <div class="d-flex align-center gap-3">
         <!-- Username Button with Dropdown -->
         <v-menu
@@ -150,7 +150,9 @@ import { useAuthStore } from "../../../stores/auth";
 const theme = useTheme();
 const isDark = ref(false);
 const authStore = useAuthStore();
-const username = ref(authStore.user.name);
+console.log("authStore", authStore.user);
+
+const username = ref(authStore.user);
 const menu = ref(false); // This will control the dropdown menu
 
 // Use I18n for locale management
@@ -209,5 +211,4 @@ const logout = () => {
 .v-app-bar[data-theme="light"] {
   background-color: #ffffff;
 }
-
 </style>

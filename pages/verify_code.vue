@@ -28,7 +28,7 @@
 
           <!-- Submit Button -->
           <primary-btn
-            class="px-7 py-3 rounded-pill mt-4"
+            class="px-7 py-4 mt-4"
             :disabled="otp.length !== 4"
             type="submit"
           >
@@ -42,33 +42,44 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useNuxtApp } from "#app";
-import { useRouter } from 'vue-router';
 import { useToast } from "vue-toast-notification";
 import { navigateTo } from "nuxt/app";
 import PrimaryBtn from "@/components/ui/buttons/PrimaryBtn.vue";
-
+import { useAuthStore } from "../stores/auth";
 definePageMeta({
   layout: "blank",
 });
 
-const { $fetch } = useNuxtApp(); // Use $fetch instead of $axios
 const toast = useToast();
-const router = useRouter();
+const authStore = useAuthStore();
 
 const otp = ref(""); // Store the OTP entered by the user
 const snackbar = ref(false); // Control Snackbar visibility
+const mobileNumber = ref<string>();
 
+if (authStore.mobile) {
+  mobileNumber.value = authStore.mobile;
+}
 // Submit OTP
 const submitOtp = async () => {
   try {
-    // Simulate OTP verification (replace with actual API call)
-    const response = await $fetch.post("/api/verify-otp", { otp: otp.value });
+    toast.info("Loading...");
 
-    // Simulate success
-    toast.success("Redirecting...");
-    navigateTo("/");
-    console.log("OTP submitted:", otp.value);
+    const success = await authStore.verifyCode({
+      mobile: mobileNumber.value,
+      code: otp.value,
+      fcm_token: "966-123421242",
+      fcm_device: "android",
+    });
+    console.log("success in verify", success);
+
+    if (success) {
+      toast.success("Redirecting...");
+      navigateTo("/");
+      console.log("OTP submitted:", otp.value);
+    } else {
+      toast.error("Verify Code Is wrong");
+    }
   } catch (error) {
     console.error("Error submitting OTP:", error);
     toast.error("An error occurred. Please try again later.");

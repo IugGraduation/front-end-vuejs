@@ -86,7 +86,7 @@ const showPassword = ref(false); // Toggle password visibility
 const { locale } = useI18n();
 
 // Password validation: Ensure it is at least 7 characters long
-const passwordPattern = /^.{7,}$/;
+const passwordPattern = /^.{8,}$/;
 
 const validateInput = (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -107,7 +107,7 @@ const validateInput = (event: Event) => {
   // Check for password length validation
   if (!passwordPattern.test(value)) {
     showError.value = true;
-    errorMessage.value = "Password must be at least 7 characters long";
+    errorMessage.value = "Password must be at least 8 characters long";
     emit("validationError", errorMessage.value); // Emit error to parent
   } else {
     showError.value = false;

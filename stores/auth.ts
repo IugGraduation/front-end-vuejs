@@ -1,22 +1,32 @@
 import { defineStore } from "pinia";
-import { useRouter } from 'vue-router';
-import { useNuxtApp } from '#app'; // Import useNuxtApp
-
+import { useRouter } from "vue-router";
+import { useApi } from "../services/api";
+import { navigateTo, useRuntimeConfig } from "nuxt/app";
+import { useToast } from "vue-toast-notification";
 interface User {
   name: string;
-  phoneNumber: string;
 }
 
-interface Credentials {
-  phoneNumber: string;
+interface LoginData {
+  mobile: string;
   password: string;
+  fcm_device: string;
+  fcm_token: string;
 }
 
 interface RegisterData {
-  fullName: string;
-  phoneNumber: string;
+  name: string;
+  mobile: string;
   password: string;
-  pestBarterSpo: string;
+  confirm_password: string;
+  pestBarterSpo?: string;
+}
+
+interface VerifyCodeData {
+  mobile: string;
+  code: string;
+  fcm_token: string;
+  fcm_device: string;
 }
 
 interface AuthState {
@@ -24,6 +34,7 @@ interface AuthState {
   authToken: string | null;
   loading: boolean;
   error: string | null;
+  mobile: string | null;
 }
 
 export const useAuthStore = defineStore("auth", {
@@ -32,66 +43,84 @@ export const useAuthStore = defineStore("auth", {
     authToken: null,
     loading: false,
     error: null,
+    mobile: null,
   }),
   getters: {
     isAuthenticated: (state): boolean => !!state.authToken,
   },
   actions: {
-    async login(credentials: Credentials): Promise<void> {
-      const { $fetch } = useNuxtApp(); // Use $fetch instead of $axios
-      const router = useRouter();
-
-      this.loading = true;
-      this.error = null;
-
+    async login(payload: LoginData): Promise<boolean> {
+      const config = useRuntimeConfig();
+      this.mobile = payload.mobile;
       try {
-        const response = await $fetch("/auth/login", {
-          method: "POST",
-          body: credentials,
-        });
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/auth/login`,
+          {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }
+        );
 
-        this.authToken = response.token; // Access token directly
-        this.user = response.user; // Access user directly
-
-        router.push("/otp");
+        if (response.status) {
+          this.user = response.data.name;
+          return true;
+        }
       } catch (err: any) {
-        this.error = err.data?.message || "Login failed. Please try again.";
-        console.error("Login error:", err);
-      } finally {
-        this.loading = false;
+        console.log(err.data?.message || "Login failed. Please try again.");
       }
+      return false;
     },
     async register(payload: RegisterData): Promise<boolean> {
-      const { $fetch } = useNuxtApp(); // Use $fetch instead of $axios
-      const router = useRouter();
-
-      this.loading = true;
-      this.error = null;
+      const config = useRuntimeConfig();
+      this.mobile = payload.mobile;
 
       try {
-        const response = await $fetch("/auth/register", {
-          method: "POST",
-          body: payload,
-        });
-
-        this.authToken = response.token; // Access token directly
-        this.user = response.user; // Access user directly
-
-        console.log("Registration response:", response);
-
-        router.push("/");
-        return true;
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/auth/register`,
+          {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }
+        );
+        if (response.status) {
+          this.user = response.data.name;
+          return true;
+        }
       } catch (err: any) {
-        this.error = err.data?.message || "Registration failed. Please try again.";
+        this.error =
+          err.data?.message || "Registration failed. Please try again.";
         console.error("Registration error:", err);
-        return false;
-      } finally {
-        this.loading = false;
       }
+      return false;
+    },
+    async verifyCode(payload: VerifyCodeData): Promise<boolean> {
+      const config = useRuntimeConfig();
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/auth/verify_code`,
+          {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }
+        );
+        console.log(response);
+
+        if (response.status) {
+          this.authToken = response.data.token;
+          this.user = response.data.name;
+          return true;
+        }
+      } catch (err: any) {
+        this.error =
+          err.data?.message || "Verification failed. Please try again.";
+        console.error("Verify Code error:", err);
+      }
+      return false;
     },
     logout(): void {
       this.user = null;
       this.authToken = null;
+      this.mobile = null;
       localStorage.removeItem("auth");
       window.location.href = "/login";
     },

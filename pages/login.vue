@@ -20,7 +20,6 @@ const password = ref<string>("");
 const phoneError = ref<string | null>(null);
 const passwordError = ref<string | null>(null);
 
-// Handle validation error emitted from child component
 const handleValidationErrorPhone = (errorMessage: string) => {
   phoneError.value = errorMessage;
 };
@@ -29,13 +28,11 @@ const handleValidationErrorPassword = (errorMessage: string) => {
 };
 
 const handleLogin = async (): Promise<void> => {
-  // التحقق من الحقول الفارغة
   if (!phone.value || !password.value) {
     toast.error("Please fill in all required fields.");
     return;
   }
 
-  // التحقق من الأخطاء
   if (phoneError.value || passwordError.value) {
     toast.error(`${phoneError.value} , ${passwordError.value}`);
     toast.error("Please fix the errors before logging in.");
@@ -43,15 +40,19 @@ const handleLogin = async (): Promise<void> => {
   }
 
   try {
-    const success = await authStore.login({
-      phoneNumber: phone.value,
+    toast.info("Loading...");
+
+    const success: boolean = await authStore.login({
+      mobile: phone.value,
       password: password.value,
+      fcm_device: "android",
+      fcm_token: "ewqewqe",
     });
     if (success) {
+      navigateTo("/verify_code");
       toast.success("Login success.");
-      navigateTo("/"); // إعادة التوجيه إلى الصفحة الرئيسية
     } else {
-      toast.error("Please try again.");
+      toast.error("Mobile Number or passwrod are wrong.");
     }
   } catch (error) {
     toast.error("An error occurred during login. Please try again.");
@@ -146,3 +147,6 @@ img {
   cursor: pointer;
 }
 </style>
+
+function definePageMeta(arg0: { layout: string; }) { throw new Error("Function
+not implemented."); }

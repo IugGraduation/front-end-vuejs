@@ -27,7 +27,6 @@ const phoneError = ref<string | null>(null);
 const passwordError = ref<string | null>(null);
 const pestBarterSpoError = ref<string | null>(null);
 
-
 // Handle validation error emitted from child component
 const handleValidationErrorFullNmae = (errorMessage: string) => {
   fullNameError.value = errorMessage;
@@ -71,19 +70,20 @@ const handleSignUp = async (): Promise<void> => {
     passwordError.value = "Passwords do not match.";
     return;
   }
+  toast.info("Loading...");
 
   try {
     // تنفيذ عملية التسجيل
     const success = await authStore.register({
-      fullName: fullName.value,
-      phoneNumber: phone.value,
+      name: fullName.value,
+      mobile: phone.value,
       password: password.value,
+      confirm_password: confirmPassword.value,
       pestBarterSpo: pestBarterSpo.value,
     });
-
     if (success) {
       toast.success("Sign up success.");
-      navigateTo("/"); // إعادة التوجيه إلى الصفحة الرئيسية
+      navigateTo("/verify_code");
     } else {
       toast.error("Invalid SignUp credentials. Please try again.");
     }
