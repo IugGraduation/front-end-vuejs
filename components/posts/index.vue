@@ -16,7 +16,7 @@
     <v-row v-else>
       <!-- Show Posts based on showAll state -->
       <v-col
-        v-for="(post, index) in visiblePosts"
+        v-for="(post) in visiblePosts"
         :key="post.id"
         cols="12"
         sm="6"
@@ -26,14 +26,14 @@
         class="post-card-wrapper mb-8"
       >
         <PostCard
-          :index="post.id"
+          :id="post.id"
           :imageUrl="post.image"
           :avatarUrl="post.avatarUrl"
-          :name="post.name"
-          :title="post.title"
+          :name="post.user_name"
+          :title="post.post_name"
           :status="post.status"
-          :description="post.description"
-          :offers="post.offers ? post.offers.length : 0"
+          :description="post.post_details"
+          :offers="num_offers"
         />
       </v-col>
     </v-row>
@@ -54,83 +54,26 @@ const postsStore = usePostStore();
 //   },
 // });
 const isLoading = ref(false);
-const posts = ref([]);
+const posts = ref([{}]);
 onMounted(async () => {
   isLoading.value = true;
-  fetchPosts();
+  // fetchPosts();
 });
-const fetchPosts = async () => {
-  try {
-    posts.value = await postsStore.fetchPosts();
-    isLoading.value = false;
-  } catch (error) {
-    console.error(error);
-  }
-};
-// const Posts = [
-//   {
-//     image: "https://picsum.photos/500/300?image=232",
-//     avatarUrl: "https://randomuser.me/api/portraits/men/1.jpg",
-//     name: "John Doe",
-//     title: "Software Engineer",
-//     status: "opne",
-//     description: "A passionate software engineer with 5+ years of experience.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=233",
-//     avatarUrl: "https://randomuser.me/api/portraits/women/1.jpg",
-//     name: "Jane Smith",
-//     title: "Product Manager",
-//     status: "close",
-//     description: "Experienced product manager leading cross-functional teams.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=234",
-//     avatarUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-//     name: "Mark Wilson",
-//     title: "Data Scientist",
-//     status: "open",
-//     description:
-//       "Data scientist focused on machine learning and AI. Data scientist focused on machine learning and AI. Data scientist focused on machine learning and AI.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=235",
-//     avatarUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
-//     name: "Emily Davis",
-//     title: "UX Designer UX Designer UX Designer",
-//     status: "open",
-//     description:
-//       "Creative UX designer dedicated to crafting intuitive user interfaces.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=335",
-//     avatarUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
-//     name: "Emily Davis",
-//     title: "UX Designer",
-//     status: "open",
-//     description:
-//       "Creative UX designer dedicated to crafting intuitive user interfaces.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=535",
-//     avatarUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
-//     name: "Emily Davis",
-//     title: "UX Designer",
-//     status: "open",
-//     description:
-//       "Creative UX designer dedicated to crafting intuitive user interfaces.",
-//   },
-// ];
-// Reactive state for toggling 'See All'
+watch(
+  () => postsStore.topPosts,
+  (newValue) => {
+    console.log("postsStore changed:", newValue);
+    isLoading.value = newValue.length === 0;
+    posts.value = postsStore.topPosts;
+  },
+  { deep: true, immediate: true }
+);
 const showAll = ref(false);
 
-// Computed property to determine which Posts to show
 const visiblePosts = computed(() => {
-  // return showAll.value ? Posts : Posts.slice(0, 3); // Show first 4 Posts or all if showAll is true
   return posts.value;
 });
 
-// Function to toggle the visibility of Posts
 function toggleSeeAll() {
   showAll.value = !showAll.value;
 }

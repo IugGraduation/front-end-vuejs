@@ -70,6 +70,8 @@ const dropdownRef = ref(null);
 watch(
   () => props.modelValue,
   (newValue) => {
+    console.log('custome drop down menu new value watch',newValue);
+    
     selectedOptions.value = [...newValue];
   },
   { immediate: true }

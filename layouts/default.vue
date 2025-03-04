@@ -22,6 +22,13 @@ import { onBeforeMount } from "vue";
 import { useAuthStore } from "../stores/auth";
 import mainNav from "../components/ui/nav/index.vue";
 import mainFooter from "@/components/ui/footer/index.vue";
+
+import { onMounted } from "vue";
+import { usePostStore } from "@/stores/posts";
+const postStore = usePostStore();
+onMounted(async () => {
+  await postStore.fetchHomeData();
+});
 // Set up vuetify theme and i18n
 const theme = useTheme();
 const i18n = useI18n();

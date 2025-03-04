@@ -45,6 +45,7 @@
         @validationError="handleDescriptionError"
       />
       <PestBeterSpo v-model="place" @validationError="handlePlaceError" />
+
       <v-select
         :items="categories"
         v-model="postCategories"
@@ -90,7 +91,7 @@ const description = ref<string>("");
 const descriptionError = ref<string>("");
 const place = ref<string>("");
 const placeError = ref<string>("");
-const categories = ref(["Category 1", "Category 2", "Category 3"]);
+const categories = ref([]);
 const postCategories = ref([]);
 const categoriesWant = ref([]);
 const images = ref<{ file: File; url: string }[]>([]);
@@ -99,8 +100,8 @@ const valid = ref(false); // Form validation state
 // Validation Errors
 const validationErrors = ref<string[]>([]);
 
-onMounted( () => {
-  categories.value = categoryStore.categories;
+onMounted(() => {
+  categories.value = postStore.categories.map((cat) => cat.name);
 });
 // Rules for validation
 const rules = {
@@ -181,8 +182,8 @@ const addOffer = async () => {
   } else {
     toast.success("success");
     console.log("Added successful!");
-    navigateTo("/profile");
-    await postStore.addPost({
+    // navigateTo("/profile");
+    const results = await postStore.addPost({
       title: title.value,
       description: description.value,
       PostCategories: postCategories.value,
@@ -190,6 +191,8 @@ const addOffer = async () => {
       pestPlace: place.value,
       images: images.value.map((image) => image.file.name),
     });
+    console.log(results);
+
     console.log({
       title: title.value,
       description: description.value,

@@ -1,0 +1,84 @@
+{
+  "status": true,
+  "message": "Done",
+  "data": {
+    "user": null,
+    "data": [
+      {
+        "title": "Browse categories",
+        "url": "category",
+        "data_type": "Categories",
+        "type": "array",
+        "data": [
+          {
+            "uuid": "0eb5f22b-f117-4fc2-bf9d-3556d6cb34d4",
+            "name": "Tools",
+            "image": "https://swapwise.shop/storage//upload/category/images/p15553077751736855860download (2).jpeg"
+          },
+          {
+            "uuid": "2d5219db-685c-4516-bcd8-17f7eaa2b65f",
+            "name": "Technology",
+            "image": "https://swapwise.shop/storage//upload/category/images/p6347129551736855933download (1).jpeg"
+          },
+          {
+            "uuid": "9e48284f-8b58-4a9e-9a22-9e0bc8137536",
+            "name": "Food",
+            "image": "https://swapwise.shop/storage//upload/category/images/p10770845831736855819download.jpeg"
+          }
+        ]
+      },
+      {
+        "title": "Popular products for rent",
+        "url": "top_interactive",
+        "data_type": "Top Interactive",
+        "type": "array",
+        "data": [
+          {
+            "uuid": "cfcb1f51-e87f-4e09-89bd-f5ef8dd00f0e",
+            "user_uuid": "17f91149-7d7b-4ea2-985e-db92ca5b7b82",
+            "user_name": "ahmed",
+            "user_image": "https://swapwise.shop/storage//upload/user/personal/p14312762341736855889IMG-20240906-WA0000.jpg",
+            "post_image": "https://swapwise.shop/storage//upload/postp21212519661736856122download (3).jpeg",
+            "post_name": "\u0633\u0643\u0631",
+            "status": "Pending",
+            "post_details": "\u0633\u0643\u0631 \u0623\u0628\u064a\u0636 \u0645\u0646 \u0646\u0627\u0639\u0645 3 \u0643\u064a\u0644\u0648 \u0628\u062f\u064a \u0627\u0628\u062f\u0644\u0647 \u0639\u0644\u0649 \u0646\u0633\u0643\u0627\u0641\u064a\u0647",
+            "num_offers": 0
+          }
+        ]
+      },
+      {
+        "title": "Popular products for rent",
+        "url": "recent_posts",
+        "data_type": "Recent Posts",
+        "type": "array",
+        "data": [
+          {
+            "uuid": "cfcb1f51-e87f-4e09-89bd-f5ef8dd00f0e",
+            "user_uuid": "17f91149-7d7b-4ea2-985e-db92ca5b7b82",
+            "user_name": "ahmed",
+            "user_image": "https://swapwise.shop/storage//upload/user/personal/p14312762341736855889IMG-20240906-WA0000.jpg",
+            "post_image": "https://swapwise.shop/storage//upload/postp21212519661736856122download (3).jpeg",
+            "post_name": "\u0633\u0643\u0631",
+            "status": "Pending",
+            "post_details": "\u0633\u0643\u0631 \u0623\u0628\u064a\u0636 \u0645\u0646 \u0646\u0627\u0639\u0645 3 \u0643\u064a\u0644\u0648 \u0628\u062f\u064a \u0627\u0628\u062f\u0644\u0647 \u0639\u0644\u0649 \u0646\u0633\u0643\u0627\u0641\u064a\u0647",
+            "num_offers": 0
+          }
+        ]
+      }
+    ]
+  },
+  "pages": {
+    "current_page": 0,
+    "first_page_url": "",
+    "from": 0,
+    "last_page": 0,
+    "last_page_url": "",
+    "next_page_url": null,
+    "path": "",
+    "per_page": 0,
+    "prev_page_url": null,
+    "to": 0,
+    "total": 0
+  },
+  "errors": []
+}

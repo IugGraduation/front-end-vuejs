@@ -20,21 +20,22 @@
 <script setup>
 import { onMounted, ref, computed, watch } from "vue";
 import { useRoute } from "vue-router";
-import { useCategoryStore } from "@/stores/categories";
+import { usePostStore } from "@/stores/posts";
 import SearchInput from "../components/ui/inputs/SearchInput.vue";
 import CustomDropDownMenu from "@/components/ui/inputs/CustomDropdown.vue";
 
-const categoryStore = useCategoryStore();
+const postStore = usePostStore();
 const route = useRoute();
 const selectedFilter = ref([]);
 
 // Computed list of filter options
 const filters = computed(() =>
-  categoryStore.categories.map((category) => category.title)
+  postStore.categories.map((category) => category.name)
 );
 
 // Handle option selection
 const handleSelect = (option) => {
+  // selectedFilter.value = [option];
   console.log("Selected option:", option);
 };
 
@@ -43,7 +44,12 @@ watch(
   () => route.query.category,
   (newCategory) => {
     if (newCategory) {
-      selectedFilter.value = [newCategory];
+      const newCategoryc = postStore.categories.find(
+        (c) => c.uuid == newCategory
+      );
+      console.log("new category",newCategoryc);
+
+      selectedFilter.value = [newCategoryc];
     }
   },
   { immediate: true }
@@ -52,10 +58,14 @@ watch(
 // Initialize selectedFilter on page load
 onMounted(() => {
   if (route.query.category) {
+    const selectedCategory = postStore.categories.find(
+      (c) => c.uuid === route.query.category
+    );
+    console.log('selected category in mounted' , selectedCategory);
     
-    selectedFilter.value = [route.query.category];
-    console.log(route.query.category , selectedFilter.value );
-  
+    if (selectedCategory) {
+      selectedFilter.value = [selectedCategory.name];
+    }
   }
 });
 </script>

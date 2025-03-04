@@ -5,6 +5,8 @@ import { navigateTo, useRuntimeConfig } from "nuxt/app";
 import { useToast } from "vue-toast-notification";
 interface User {
   name: string;
+  uuid: string;
+  image: string;
 }
 
 interface LoginData {
@@ -62,7 +64,6 @@ export const useAuthStore = defineStore("auth", {
         );
 
         if (response.status) {
-          this.user = response.data.name;
           return true;
         }
       } catch (err: any) {
@@ -83,7 +84,6 @@ export const useAuthStore = defineStore("auth", {
           }
         );
         if (response.status) {
-          this.user = response.data.name;
           return true;
         }
       } catch (err: any) {
@@ -103,11 +103,11 @@ export const useAuthStore = defineStore("auth", {
             body: JSON.stringify(payload),
           }
         );
-        console.log(response);
+        // console.log(response);
 
         if (response.status) {
           this.authToken = response.data.token;
-          this.user = response.data.name;
+          this.user = response.data;
           return true;
         }
       } catch (err: any) {

@@ -20,8 +20,6 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <!-- Show categories based on showAll state -->
-
       <v-col
         v-for="(category, index) in visibleCategories"
         :key="index"
@@ -34,8 +32,8 @@
       >
         <categoryCard
           :image="category.image"
-          :title="category.title"
-          :index="index"
+          :title="category.name"
+          :index="category.uuid"
         />
       </v-col>
     </v-row>
@@ -43,36 +41,37 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import categoryCard from "../ui/cards/CategoryCard.vue";
 import { useCategoryStore } from "@/stores/categories";
+import { usePostStore } from "../../stores/posts";
 
 const categoryStore = useCategoryStore();
+const postStore = usePostStore();
 
-await categoryStore.fetchCategories();
+const isLoading = ref(true);
+const categories = ref([]);
 
-const isLoading = ref < Boolean > true;
-
-const categories = categoryStore.categories;
-
-// Reactive state for toggling 'See All'
+watch(
+  () => postStore.categories,
+  (newValue) => {
+    console.log("Categories changed:", newValue);
+    isLoading.value = newValue.length === 0;
+  },
+  { deep: true, immediate: true }
+);
 const showAll = ref(false);
 
-// Computed property to determine which categories to show
 const visibleCategories = computed(() => {
-  return showAll.value ? categories : categories.slice(0, 3); // Show first 4 categories or all if showAll is true
+  return postStore.categories;
 });
 
-// Function to toggle the visibility of categories
 function toggleSeeAll() {
   showAll.value = !showAll.value;
 }
-
-
 </script>
 
 <style scoped>
-/* Adjust button styling */
 .see-all-btn {
   padding: 0.5rem 1rem;
   font-weight: bold;
@@ -80,21 +79,9 @@ function toggleSeeAll() {
   color: rgb(var(--v-theme-primary));
 }
 
-/* Optional: custom styling for category cards */
 .v-col {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
-/* Add fade transition effect for when categories are revealed */
-/* .category-card-wrapper {
-  transition: opacity 0.5s ease-in-out;
-  opacity: 0;
-}
-
-.category-card-wrapper-enter-active,
-.category-card-wrapper-leave-active {
-  opacity: 1;
-} */
 </style>

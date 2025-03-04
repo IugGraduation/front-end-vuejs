@@ -152,7 +152,7 @@ const isDark = ref(false);
 const authStore = useAuthStore();
 console.log("authStore", authStore.user);
 
-const username = ref(authStore.user);
+const username = ref(authStore.user.name);
 const menu = ref(false); // This will control the dropdown menu
 
 // Use I18n for locale management

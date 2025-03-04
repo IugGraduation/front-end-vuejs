@@ -7,7 +7,7 @@
           height="400"
           hide-delimiter-background
           show-arrows
-          v-if="post.images"
+          v-if="false"
         >
           <template v-slot:prev="{ props }">
             <v-btn variant="flat" @click="props.onClick"
@@ -43,19 +43,19 @@
           </v-carousel-item>
         </v-carousel>
         <v-img
-          v-if="!post.images"
+          v-if="!post.post_image"
           class="mx-auto"
           width="auto"
           height="700"
-          :src="post.image"
+          :src="post.post_image"
         />
       </template>
       <div class="card__avatar-data">
         <div class="avatar-section">
           <v-avatar size="44">
-            <v-img :alt="post.name" :src="post.avatarUrl"></v-img>
+            <v-img :alt="post.post_name" :src="post.user_image"></v-img>
           </v-avatar>
-          <h5 class="avatar-name">{{ post.name }}</h5>
+          <h5 class="avatar-name">{{ post.post_name }}</h5>
         </div>
         <div class="date-section">
           <v-chip>
@@ -108,7 +108,7 @@
         <div class="offers-status">
           <div class="offers">
             <h5 class="offers-numbers">
-              {{ post.offers ? post.offers.length : "0" }}
+              {{ post.num_offers }}
             </h5>
             <p>Offers</p>
           </div>
@@ -120,21 +120,21 @@
 
         <!-- Title Section -->
         <div class="title">
-          <h3>{{ post.title }}</h3>
+          <h3>{{ post.post_name }}</h3>
         </div>
 
         <!-- Details Section -->
         <div class="details mx-auto">
           <p>
-            {{ post.description }}
+            {{ post.post_details }}
           </p>
         </div>
 
         <!-- Favorite Categories -->
         <div class="favorite-categories">
           <ul>
-            <li v-for="category in post.categories" :key="category">
-              <v-chip>{{ category }}</v-chip>
+            <li v-for="category in post.favorite_categories" :key="category">
+              <v-chip>{{ category.category_name }}</v-chip>
             </li>
           </ul>
         </div>
@@ -190,9 +190,15 @@ const postHasImages = ref<boolean>(false);
 
 const post = ref({});
 onMounted(async () => {
-
   imagesLoaded.value = true;
-  post.value = await postsStore.fetchOnePost(route.params.id);
+  const postId: string = route.params.id;
+  const respons = await postsStore.fetchOnePost(postId);
+  console.log(respons.post_image);
+  if (respons.status) {
+    post.value = respons;
+  } else {
+    console.log("not found");
+  }
 });
 // Define an array of colors
 const colors = ref<string[]>([

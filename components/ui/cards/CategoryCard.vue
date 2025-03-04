@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink :to="`/search?category=${encodeURIComponent(title)}`">
+  <NuxtLink :to="`/search?category=${index}`">
     <div class="card">
       <v-img :src="image" alt="Card Image" class="card_image" />
       <span class="card_title">{{ title }} </span>
@@ -19,7 +19,7 @@ defineProps({
     required: true,
   },
   index: {
-    type: Number,
+    type: String,
     required: true,
   },
 });

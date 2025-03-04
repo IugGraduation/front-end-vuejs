@@ -32,6 +32,8 @@ import Postes from "../components/posts/index.vue";
 import SearchInput from "../components/ui/inputs/SearchInput.vue";
 import PrimaryBtn from "../components/ui/buttons/PrimaryBtn.vue";
 import { useCategoryStore } from "@/stores/categories";
+import { usePostStore } from "@/stores/posts";
+
 definePageMeta({
   middleware: "auth", // Restrict access to logged-in users
   title: "Custom Title for this Page",
@@ -42,6 +44,7 @@ const phone = ref("");
 const searchValue = ref<string>("");
 const isLoading = ref(false);
 const p = ref("");
+const postStore = usePostStore();
 
 let debounceTimeout: String;
 const sendSearchRequest = (value) => {
@@ -58,6 +61,7 @@ watch(searchValue, (newValue) => {
   isLoading.value = true;
 });
 onMounted(async () => {
+  await postStore.fetchHomeData();
   // await useCategoryStore.fetchCategories();
 });
 </script>
@@ -69,10 +73,10 @@ onMounted(async () => {
   z-index: 99;
 }
 .add-new-post button {
-width: 50px;
-height: 50px;
-display: flex;
-align-items: center;
-justify-content: center;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

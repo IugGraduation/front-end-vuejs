@@ -4,7 +4,7 @@
     @mouseover="isHovered = true"
     @mouseleave="isHovered = false"
   >
-    <img :src="imageUrl" alt="Card Image" class="card_image" />
+    <img :src="imageUrl" :alt="imageUrl" class="card_image" />
     <div class="card__avatar-status">
       <div class="avtar">
         <v-avatar size="18">
@@ -12,7 +12,7 @@
         </v-avatar>
         <h5 class="avtar_name">{{ name }}</h5>
       </div>
-      <div class="status" :class="status == 'open' ? 'open' : 'close'">
+      <div class="status" :class="status == 'Active' ? 'open' : 'close'">
         <span>{{ status }}</span>
       </div>
     </div>
@@ -72,7 +72,7 @@
       </div>
       <p class="description_offer mt-2">{{ descriptionFirstEightWords }}</p>
     </div>
-    <NuxtLink :to="`/posts/${index}`">
+    <NuxtLink :to="`/posts/${id}`">
       <button class="create_offer">
         <svg
           width="16"
@@ -119,7 +119,7 @@
     </NuxtLink>
     <template v-if="!isMyPost">
       <div v-if="isHovered" class="overlay">
-        <NuxtLink :to="`/posts/${index}`">
+        <NuxtLink :to="`/posts/${id}`">
           <button class="create_offer">
             <span> Add Your Offer </span>
           </button>
@@ -128,7 +128,7 @@
     </template>
     <template v-else>
       <div v-if="isHovered" class="overlay">
-        <NuxtLink :to="`/posts/edit/${index}`">
+        <NuxtLink :to="`/posts/edit/${id}`">
           <button class="create_offer">
             <span> Edit My Post </span>
           </button>
@@ -148,7 +148,7 @@ const props = defineProps<{
   title: string;
   status: string;
   description: string;
-  index: number;
+  id: string;
   offers: string;
   isMyPost: boolean;
 }>();
