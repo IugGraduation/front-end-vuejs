@@ -30,4 +30,19 @@ export default {
   deletePost: "حذف المنشور",
   addOffer: "إضافة عرض",
   editOffer: "تعديل العرض",
+  reset_password: {
+    title: "إعادة تعيين كلمة المرور",
+    subtitle: "يرجى إدخال كلمة المرور الحالية والجديدة",
+    current_password: "كلمة المرور الحالية",
+    new_password: "كلمة المرور الجديدة",
+    confirm_new_password: "تأكيد كلمة المرور الجديدة",
+    submit: "إرسال",
+    required: "هذا الحقل مطلوب",
+    min_length: "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+    number_required: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل",
+    special_character_required:
+      "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل",
+    passwords_do_not_match: "كلمتا المرور غير متطابقتين",
+    success: "تمت إعادة تعيين كلمة المرور بنجاح!",
+  },
 };

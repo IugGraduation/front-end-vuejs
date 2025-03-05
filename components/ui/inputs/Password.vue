@@ -107,7 +107,7 @@ const validateInput = (event: Event) => {
   // Check for password length validation
   if (!passwordPattern.test(value)) {
     showError.value = true;
-    errorMessage.value = "Password must be at least 8 characters long";
+    errorMessage.value = "Password is too weak";
     emit("validationError", errorMessage.value); // Emit error to parent
   } else {
     showError.value = false;

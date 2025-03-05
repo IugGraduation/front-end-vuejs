@@ -55,7 +55,6 @@ const categories = ref([]);
 watch(
   () => postStore.categories,
   (newValue) => {
-    console.log("Categories changed:", newValue);
     isLoading.value = newValue.length === 0;
   },
   { deep: true, immediate: true }

@@ -1,13 +1,13 @@
 <template>
   <div>
-    <v-container>
+    <v-container class="position-relative">
       <h1>Post Details</h1>
       <template v-if="imagesLoaded">
         <v-carousel
           height="400"
           hide-delimiter-background
           show-arrows
-          v-if="false"
+          v-if="postHasImages"
         >
           <template v-slot:prev="{ props }">
             <v-btn variant="flat" @click="props.onClick"
@@ -38,24 +38,30 @@
             </v-btn>
           </template>
 
-          <v-carousel-item v-for="image in post.images" :key="image">
-            <v-img class="mx-auto" width="auto" height="700" :src="image" />
+          <v-carousel-item v-for="image in post.image" :key="image">
+            <v-img
+              class="mx-auto"
+              max-width="450"
+              max-height="700"
+              :src="image.attachment"
+            />
           </v-carousel-item>
         </v-carousel>
+
         <v-img
-          v-if="!post.post_image"
+          v-if="!post.image"
           class="mx-auto"
           width="auto"
           height="700"
-          :src="post.post_image"
+          :src="post.image"
         />
       </template>
       <div class="card__avatar-data">
         <div class="avatar-section">
           <v-avatar size="44">
-            <v-img :alt="post.post_name" :src="post.user_image"></v-img>
+            <v-img :alt="post.name" :src="post.avatarUrl"></v-img>
           </v-avatar>
-          <h5 class="avatar-name">{{ post.post_name }}</h5>
+          <h5 class="avatar-name">{{ post.name }}</h5>
         </div>
         <div class="date-section">
           <v-chip>
@@ -120,13 +126,13 @@
 
         <!-- Title Section -->
         <div class="title">
-          <h3>{{ post.post_name }}</h3>
+          <h3>{{ post.title }}</h3>
         </div>
 
         <!-- Details Section -->
         <div class="details mx-auto">
           <p>
-            {{ post.post_details }}
+            {{ post.description }}
           </p>
         </div>
 
@@ -142,7 +148,6 @@
         <!-- Offers Section -->
         <v-row class="mb-16">
           <!-- Show Posts based on showAll state -->
-
           <v-col
             v-if="post.offers"
             v-for="offer in post.offers"
@@ -155,21 +160,20 @@
             class="post-card-wrapper"
           >
             <OfferCard
-              :index="offer.id"
-              :imageUrl="offer.imageUrl"
+              :index="offer.uuid"
+              :imageUrl="offer.user_image"
               :avatarUrl="offer.avatarUrl"
-              :name="offer.name"
+              :name="offer.user_name"
               :title="offer.title"
-              :description="offer.description"
+              :description="offer.details"
           /></v-col>
         </v-row>
-
-        <!-- Add Offer Button -->
-        <div class="add-offer-button">
-          <NuxtLink :to="`/offer/${post.id}`">
-            <PrimaryBtn class="py-3 px-7 w-100">Add Offer</PrimaryBtn>
-          </NuxtLink>
-        </div>
+      </div>
+      <!-- Add Offer Button -->
+      <div class="add-offer-button">
+        <NuxtLink :to="`/offer/${post.id}`">
+          <PrimaryBtn class="py-3 px-7 w-100">Add Offer</PrimaryBtn>
+        </NuxtLink>
       </div>
     </v-container>
   </div>
@@ -181,10 +185,12 @@ import { onMounted, ref } from "vue";
 import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
 import OfferCard from "../../components/ui/cards/OfferCard.vue";
 import { usePostStore } from "@/stores/posts";
+import { useToast } from "vue-toast-notification";
+
 // Access the current route
 const route = useRoute();
 const postsStore = usePostStore();
-
+const toast = useToast();
 const imagesLoaded = ref<boolean>(false);
 const postHasImages = ref<boolean>(false);
 
@@ -193,24 +199,13 @@ onMounted(async () => {
   imagesLoaded.value = true;
   const postId: string = route.params.id;
   const respons = await postsStore.fetchOnePost(postId);
-  console.log(respons.post_image);
-  if (respons.status) {
-    post.value = respons;
+  postHasImages.value = respons.data.image.length ? true : false;
+  if (respons.success) {
+    post.value = respons.data;
   } else {
-    console.log("not found");
+    toast.error("Error");
   }
 });
-// Define an array of colors
-const colors = ref<string[]>([
-  "indigo",
-  "warning",
-  "pink darken-2",
-  "red lighten-1",
-  "deep-purple accent-4",
-]);
-
-// Define an array of slide titles
-const slides = ref<string[]>(["First", "Second", "Third", "Fourth", "Fifth"]);
 </script>
 <style scoped>
 .card__avatar-data {
@@ -308,6 +303,7 @@ const slides = ref<string[]>(["First", "Second", "Third", "Fourth", "Fifth"]);
 
 .add-offer-button {
   text-align: center;
+  z-index: 2;
   position: fixed;
   transform: translate(-50%);
   width: 300px;

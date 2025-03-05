@@ -47,21 +47,18 @@ const p = ref("");
 const postStore = usePostStore();
 
 let debounceTimeout: String;
-const sendSearchRequest = (value) => {
-  // Simulate sending a request (replace with actual request logic)
-  console.log("Sending request for:", value);
-};
 
-watch(searchValue, (newValue) => {
-  clearTimeout(debounceTimeout); // إلغاء أي مؤقت سابق
-  debounceTimeout = setTimeout(() => {
-    isLoading.value = false;
-    sendSearchRequest(newValue); // إرسال الطلب بعد ثانيتين
-  }, 500);
-  isLoading.value = true;
-});
+
+// watch(searchValue, (newValue) => {
+//   clearTimeout(debounceTimeout); // إلغاء أي مؤقت سابق
+//   debounceTimeout = setTimeout(() => {
+//     isLoading.value = false;
+//     sendSearchRequest(newValue); // إرسال الطلب بعد ثانيتين
+//   }, 500);
+//   isLoading.value = true;
+// });
 onMounted(async () => {
-  await postStore.fetchHomeData();
+  // await postStore.fetchHomeData();
   // await useCategoryStore.fetchCategories();
 });
 </script>

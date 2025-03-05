@@ -71,12 +71,10 @@ const submitOtp = async () => {
       fcm_token: "966-123421242",
       fcm_device: "android",
     });
-    console.log("success in verify", success);
 
     if (success) {
       toast.success("Redirecting...");
       navigateTo("/");
-      console.log("OTP submitted:", otp.value);
     } else {
       toast.error("Verify Code Is wrong");
     }

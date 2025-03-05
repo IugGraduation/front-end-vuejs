@@ -5,6 +5,7 @@
         <h2>Posts</h2>
       </v-col>
     </v-row>
+    <pre></pre>
     <v-row v-if="isLoading">
       <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">
         <v-skeleton-loader
@@ -16,7 +17,7 @@
     <v-row v-else>
       <!-- Show Posts based on showAll state -->
       <v-col
-        v-for="(post) in visiblePosts"
+        v-for="post in visiblePosts"
         :key="post.id"
         cols="12"
         sm="6"
@@ -29,11 +30,11 @@
           :id="post.id"
           :imageUrl="post.image"
           :avatarUrl="post.avatarUrl"
-          :name="post.user_name"
-          :title="post.post_name"
+          :name="post.name"
+          :title="post.title"
           :status="post.status"
-          :description="post.post_details"
-          :offers="num_offers"
+          :description="post.description"
+          :num_offers="post.num_offers"
         />
       </v-col>
     </v-row>
@@ -62,7 +63,6 @@ onMounted(async () => {
 watch(
   () => postsStore.topPosts,
   (newValue) => {
-    console.log("postsStore changed:", newValue);
     isLoading.value = newValue.length === 0;
     posts.value = postsStore.topPosts;
   },

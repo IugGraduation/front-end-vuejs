@@ -67,7 +67,7 @@
               />
             </svg>
           </div>
-          <span class="offers_number">{{ offers }} Offers</span>
+          <span class="offers_number">{{ num_offers }} Offers</span>
         </div>
       </div>
       <p class="description_offer mt-2">{{ descriptionFirstEightWords }}</p>
@@ -149,7 +149,7 @@ const props = defineProps<{
   status: string;
   description: string;
   id: string;
-  offers: string;
+  num_offers: Number;
   isMyPost: boolean;
 }>();
 
@@ -169,11 +169,12 @@ const descriptionFirstEightWords = computed(() => {
   if (!props.description) {
     return;
   }
-  if (props.description.split(" ").length > 10) {
-    return props.description.split(" ").slice(0, 10).join(" ") + "...";
+  if (props.description.split("").length > 50) {
+    return props.description.split("").slice(0, 50).join("") + "...";
   }
   return props.description;
 });
+
 
 const isHovered = ref(false);
 </script>
