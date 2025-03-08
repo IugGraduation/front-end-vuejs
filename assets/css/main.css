@@ -125,3 +125,6 @@ input::placeholder {
   font-size: 40px;
   color: rgb(var(--v-theme-primary));
 }
+.v-responsive {
+  align-items: center;
+}

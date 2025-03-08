@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import Posts from "../components/posts/index.vue";
+import Posts from "@/components/posts/index.vue";
 definePageMeta({
   middleware: "auth", // Restrict access to logged-in users
 });

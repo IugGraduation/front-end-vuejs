@@ -38,7 +38,7 @@
     />
 
     <!-- Form Inputs -->
-    <v-form @submit.prevent="addOffer">
+    <v-form @submit.prevent="addPost">
       <Title v-model="title" @validationError="handleTitleError" />
       <TextArea
         v-model="description"
@@ -51,9 +51,11 @@
         v-model="postCategories"
         label="Categories Of Your Post"
         chips
-        multiple
         variant="outlined"
+        item-title="name"
+        item-value="id"
       ></v-select>
+
       <v-select
         :items="categories"
         v-model="categoriesWant"
@@ -61,15 +63,17 @@
         chips
         multiple
         variant="outlined"
+        item-title="name"
+        item-value="id"
       ></v-select>
       <div class="w-full text-center">
-        <PrimaryBtn @click="submitForm" class="px-7 py-3">Add Offer</PrimaryBtn>
+        <PrimaryBtn @click="submitForm" class="px-7 py-3">Add Post</PrimaryBtn>
       </div>
     </v-form>
   </v-container>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
 import Title from "../../components/ui/inputs/Title.vue";
@@ -79,11 +83,13 @@ import { useToast } from "vue-toast-notification";
 import { navigateTo } from "nuxt/app";
 import { useCategoryStore } from "@/stores/categories";
 import { usePostStore } from "@/stores/posts";
+
 // Access the current route
 const route = useRoute();
 const toast = useToast();
 const categoryStore = useCategoryStore();
 const postStore = usePostStore();
+
 // Reactive Data
 const title = ref<string>("");
 const titleError = ref<string>("");
@@ -100,13 +106,19 @@ const valid = ref(false); // Form validation state
 // Validation Errors
 const validationErrors = ref<string[]>([]);
 
+// Fetch categories on mount
 onMounted(() => {
-  categories.value = postStore.categories.map((cat) => cat.name);
+  categories.value = postStore.categories.map((cat) => ({
+    name: cat.name,
+    id: cat.uuid,
+  }));
 });
-// Rules for validation
-const rules = {
-  required: (value: string) => !!value || "This field is required",
-};
+watch(postCategories, (newValue) => {
+  console.log("Selected Categories IDs:", newValue);
+});
+watch(categoriesWant, (newValue) => {
+  console.log("Selected Categories IDs:", newValue);
+});
 
 // File Handling
 const handleDrop = (event: DragEvent) => {
@@ -153,7 +165,7 @@ const resetFileInput = () => {
 };
 
 // Form Submission
-const addOffer = async () => {
+const addPost = async () => {
   // Reset previous errors
   validationErrors.value = [];
 
@@ -178,32 +190,52 @@ const addOffer = async () => {
   // Log errors or success
   if (validationErrors.value.length > 0) {
     console.error("Validation Errors:", validationErrors.value);
-    toast.error("some inputs rqurired");
+    toast.error("Some inputs are required.");
   } else {
-    toast.success("success");
-    console.log("Added successful!");
-    // navigateTo("/profile");
-    const results = await postStore.addPost({
-      title: title.value,
-      description: description.value,
-      PostCategories: postCategories.value,
-      categoriesWant: categoriesWant.value,
-      pestPlace: place.value,
-      images: images.value.map((image) => image.file.name),
-    });
-    console.log(results);
+    try {
+      // Prepare FormData for the API request
+      const formData = new FormData();
+      console.log(
+        title.value,
+        place.value,
+        description.value,
+        postCategories.value,
+        categoriesWant.value
+      );
 
-    console.log({
-      title: title.value,
-      description: description.value,
-      PostCategories: postCategories.value,
-      categoriesWant: categoriesWant.value,
-      images: images.value.map((image) => image.file.name),
-    });
+      // Append text fields
+      formData.append("name", title.value);
+      formData.append("place", place.value);
+      formData.append("details", description.value);
+      formData.append("category_uuid", postCategories.value); // Assuming single category for now
+      categories.value.forEach((cat, index) => {
+        console.log(cat.id);
+        
+        formData.append(`fcategory[${index}]`, cat.id); // Assuming single favorite category for now
+      });
+
+      // // Append images
+      images.value.forEach((image, index) => {
+        formData.append(`images[${index}]`, image.file);
+      });
+
+      // Call the store action to add the post
+      const response = await postStore.addPost(formData);
+      console.log(response);
+
+      if (response.success) {
+        toast.success("Post added successfully!");
+        navigateTo("/"); // Redirect to profile or another page
+      } else {
+        toast.error(response.message || "Failed to add post.");
+      }
+    } catch (error) {
+      console.error("Error adding post:", error);
+      toast.error("An error occurred while adding the post.");
+    }
   }
 };
 </script>
-
 <style scoped>
 .drag-drop-area {
   border: 2px dashed #ccc;

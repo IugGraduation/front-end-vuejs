@@ -15,7 +15,6 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <!-- Show Posts based on showAll state -->
       <v-col
         v-for="post in visiblePosts"
         :key="post.id"
@@ -44,31 +43,22 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import PostCard from "../ui/cards/PostCard.vue";
-import PrimaryBtn from "../ui/buttons/PrimaryBtn.vue";
 import { usePostStore } from "@/stores/posts";
-// Define an array of Posts
+
 const postsStore = usePostStore();
 
-// defineProps({
-//   isLoading: {
-//     type: Boolean,
-//   },
-// });
-const isLoading = ref(false);
 const posts = ref([{}]);
-onMounted(async () => {
-  isLoading.value = true;
-  // fetchPosts();
-});
+
 watch(
   () => postsStore.topPosts,
   (newValue) => {
-    isLoading.value = newValue.length === 0;
     posts.value = postsStore.topPosts;
   },
   { deep: true, immediate: true }
 );
 const showAll = ref(false);
+
+const isLoading = computed(() => (visiblePosts.length == 0 ? true : false));
 
 const visiblePosts = computed(() => {
   return posts.value;
@@ -97,8 +87,6 @@ definePageMeta({
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.all-posts {
 }
 .v-skeleton-loader .v-skeleton-loader__image {
   border-radius: 23px 23px 0 0 !important;

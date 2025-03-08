@@ -110,7 +110,7 @@ export const usePostStore = defineStore("posts", {
       const config = useRuntimeConfig();
 
       try {
-        const post = await $fetch<Post>(
+        const { data: post } = await $fetch<Post>(
           `${config.public.API_BASE_URL}/post/${postId}`,
           {
             method: "GET",
@@ -122,17 +122,17 @@ export const usePostStore = defineStore("posts", {
         }
 
         const result: Post = {
-          id: post.data.uuid,
-          userId: post.data.user_uuid,
-          avatarUrl: post.data.user_image,
-          name: post.data.user_name,
-          image: post.data.post_image,
-          title: post.data.post_name,
-          description: post.data.post_details,
+          id: post.uuid,
+          userId: post.user_uuid,
+          avatarUrl: post.user_image,
+          name: post.user_name,
+          image: post.post_image,
+          title: post.post_name,
+          description: post.post_details,
           status: post.status,
-          offers: post.data.offers,
-          num_offers: post.data.num_offers,
-          favorite_categories: post.data.favorite_categories,
+          offers: post.offers,
+          num_offers: post.num_offers,
+          favorite_categories: post.favorite_categories,
         };
 
         return { success: true, data: result };
@@ -160,51 +160,36 @@ export const usePostStore = defineStore("posts", {
       }
     },
 
-    async addPost(payload) {
+    async addPost(formData: FormData): Promise<ApiResponse<void>> {
       const authStore = useAuthStore();
-      if (!authStore.user) {
-        throw new Error("User not authenticated");
-      }
-      // Add New Post
+      console.log("from add post >> auth token", authStore.authToken);
+
       const config = useRuntimeConfig();
-      // loading.value = true;
-      // error.value = null;
-      // success.value = null;
-      console.log(payload);
-
-      const formData = new FormData();
-      Object.keys(payload).forEach((key) => {
-        const value = payload[key];
-
-        if (Array.isArray(value)) {
-          value.forEach((item, index) => {
-            formData.append(`${key}[${index}]`, item);
-          });
-        } else {
-          formData.append(key, value);
-        }
-      });
-
       try {
         const response: any = await $fetch(
           `${config.public.API_BASE_URL}/post/store`,
           {
             method: "POST",
             body: formData,
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`, // Use the token from runtime config
+            },
           }
         );
-        console.log(response);
+        console.log("respons from add posts", response);
 
         if (response.status) {
-          // success.value = "Post added successfully!";
-          return true;
+          return { success: true, message: "Post added successfully." };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to add post.",
+          };
         }
-      } catch (err) {
-        // error.value = err.data?.message || "Failed to add post.";
-        console.error("Add Post Error:", err);
-      } finally {
+      } catch (error) {
+        console.error("Add Post Error:", error);
+        return { success: false, message: "Failed to add post." };
       }
-      return false;
     },
 
     async deletePost(postId) {
@@ -218,7 +203,9 @@ export const usePostStore = defineStore("posts", {
       );
       this.posts = this.posts.filter((post) => post.id !== postId);
     },
+    fetchAllPosts (){
 
+    },
     async addOfferToPost(postId, offer) {
       const authStore = useAuthStore();
       if (!authStore.user) {

@@ -13,7 +13,7 @@
     </v-row>
 
     <div class="add-new-post">
-      <NuxtLink to="posts/add/1">
+      <NuxtLink to="posts/add">
         <PrimaryBtn class="rounded-pill text-h4"
           >+
           <v-tooltip activator="parent" location="start"

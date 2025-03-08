@@ -49,7 +49,7 @@ const handleLogin = async (): Promise<void> => {
       fcm_token: "ewqewqe",
     });
     if (success) {
-      navigateTo("/verify_code");
+      navigateTo("/");
       toast.success("Login success.");
     } else {
       toast.error("Mobile Number or passwrod are wrong.");

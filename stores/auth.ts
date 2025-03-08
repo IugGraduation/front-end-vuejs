@@ -37,6 +37,7 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   mobile: string | null;
+  isAuthenticated: boolean;
 }
 
 export const useAuthStore = defineStore("auth", {
@@ -46,10 +47,9 @@ export const useAuthStore = defineStore("auth", {
     loading: false,
     error: null,
     mobile: null,
+    isAuthenticated: false,
   }),
-  getters: {
-    isAuthenticated: (state): boolean => !!state.authToken,
-  },
+  getters: {},
   actions: {
     async login(payload: LoginData): Promise<boolean> {
       const config = useRuntimeConfig();
@@ -64,6 +64,9 @@ export const useAuthStore = defineStore("auth", {
         );
 
         if (response.status) {
+          this.authToken = response.data.token;
+          this.user = response.data;
+          this.isAuthenticated = true;
           return true;
         }
       } catch (err: any) {
@@ -108,6 +111,7 @@ export const useAuthStore = defineStore("auth", {
         if (response.status) {
           this.authToken = response.data.token;
           this.user = response.data;
+          this.isAuthenticated = true;
           return true;
         }
       } catch (err: any) {
