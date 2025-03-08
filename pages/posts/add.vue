@@ -113,12 +113,6 @@ onMounted(() => {
     id: cat.uuid,
   }));
 });
-watch(postCategories, (newValue) => {
-  console.log("Selected Categories IDs:", newValue);
-});
-watch(categoriesWant, (newValue) => {
-  console.log("Selected Categories IDs:", newValue);
-});
 
 // File Handling
 const handleDrop = (event: DragEvent) => {
@@ -195,13 +189,6 @@ const addPost = async () => {
     try {
       // Prepare FormData for the API request
       const formData = new FormData();
-      console.log(
-        title.value,
-        place.value,
-        description.value,
-        postCategories.value,
-        categoriesWant.value
-      );
 
       // Append text fields
       formData.append("name", title.value);
@@ -209,8 +196,6 @@ const addPost = async () => {
       formData.append("details", description.value);
       formData.append("category_uuid", postCategories.value); // Assuming single category for now
       categories.value.forEach((cat, index) => {
-        console.log(cat.id);
-        
         formData.append(`fcategory[${index}]`, cat.id); // Assuming single favorite category for now
       });
 
@@ -221,7 +206,6 @@ const addPost = async () => {
 
       // Call the store action to add the post
       const response = await postStore.addPost(formData);
-      console.log(response);
 
       if (response.success) {
         toast.success("Post added successfully!");

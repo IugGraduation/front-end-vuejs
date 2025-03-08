@@ -203,8 +203,37 @@ export const usePostStore = defineStore("posts", {
       );
       this.posts = this.posts.filter((post) => post.id !== postId);
     },
-    fetchAllPosts (){
+    async fetchAllPosts(page: number): Promise<ApiResponse<any>> {
+      const authStore = useAuthStore();
+      const config = useRuntimeConfig();
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/see_all?type=recent_posts&page=${page}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`,
+            },
+          }
+        );
+        console.log(response.pages);
 
+        if (response.status) {
+          return {
+            success: true,
+            data: response.data, // Array of posts
+            pages: response.pages, // Pagination metadata
+          };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to fetch posts.",
+          };
+        }
+      } catch (error) {
+        console.error("Fetch All Posts Error:", error);
+        return { success: false, message: "Failed to fetch posts." };
+      }
     },
     async addOfferToPost(postId, offer) {
       const authStore = useAuthStore();
