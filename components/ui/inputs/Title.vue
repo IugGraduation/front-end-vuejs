@@ -52,7 +52,7 @@ const emit = defineEmits<{
 const showError = ref(false);
 const errorMessage = ref("");
 
-const fullNamePattern = /^[A-Za-z\u0600-\u06FF\s]+$/;
+const fullNamePattern = /^(?=.*[A-Za-z\u0600-\u06FF])[A-Za-z\u0600-\u06FF0-9_\s]{3,}$/;
 const { locale } = useI18n(); // Use i18n's locale property
 const { isRtl } = useRtl();
 
@@ -63,7 +63,7 @@ const validateInput = (event: Event) => {
   // Check if the value matches the full name pattern
   if (!fullNamePattern.test(value)) {
     showError.value = true;
-    errorMessage.value = "Please enter a valid full name";
+    errorMessage.value = "Please enter a valid Title";
     emit("validationError", errorMessage.value); // Emit error to parent
   } else {
     showError.value = false;

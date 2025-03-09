@@ -119,7 +119,7 @@
             <p>Offers</p>
           </div>
           <div class="status">
-            <h5>{{ post.status }}</h5>
+            <h5>{{ post.status == 1 ? "Open" : "Close" }}</h5>
             <p>Status</p>
           </div>
         </div>
@@ -160,8 +160,9 @@
             class="post-card-wrapper"
           >
             <OfferCard
-              :index="offer.uuid"
-              :imageUrl="offer.user_image"
+              :id="offer.uuid"
+              :userId="post.userId"
+              :imageUrl="offer.image"
               :avatarUrl="offer.avatarUrl"
               :name="offer.user_name"
               :title="offer.title"
@@ -170,7 +171,10 @@
         </v-row>
       </div>
       <!-- Add Offer Button -->
-      <div class="add-offer-button">
+      <div
+        class="add-offer-button"
+        v-if="post.userId !== authStore.user?.uuid"
+      >
         <NuxtLink :to="`/offer/${post.id}`">
           <PrimaryBtn class="py-3 px-7 w-100">Add Offer</PrimaryBtn>
         </NuxtLink>
@@ -186,24 +190,28 @@ import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
 import OfferCard from "../../components/ui/cards/OfferCard.vue";
 import { usePostStore } from "@/stores/posts";
 import { useToast } from "vue-toast-notification";
+import { useAuthStore } from "@/stores/auth";
 
 // Access the current route
 const route = useRoute();
 const postsStore = usePostStore();
+const authStore = useAuthStore();
 const toast = useToast();
 const imagesLoaded = ref<boolean>(false);
 const postHasImages = ref<boolean>(false);
+const post = ref<any>({});
 
-const post = ref({});
 onMounted(async () => {
   imagesLoaded.value = true;
-  const postId: string = route.params.id;
-  const respons = await postsStore.fetchOnePost(postId);
-  postHasImages.value = respons.data.image.length ? true : false;
-  if (respons.success) {
-    post.value = respons.data;
+  const postId: string = route.params.id as string;
+  const response = await postsStore.fetchOnePost(postId);
+  postHasImages.value = response.data.image.length ? true : false;
+  if (response.success) {
+    console.log(response);
+
+    post.value = response.data;
   } else {
-    toast.error("Error");
+    toast.error("Error fetching post details.");
   }
 });
 </script>

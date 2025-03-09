@@ -50,13 +50,15 @@
         @validationError="handleDescriptionError"
       />
       <PestBeterSpo v-model="place" @validationError="handlePlaceError" />
+
       <v-select
         :items="categories"
         v-model="postCategories"
         label="Categories Of Your Post"
         chips
-        multiple
         variant="outlined"
+        item-title="name_translate"
+        item-value="uuid"
       ></v-select>
       <v-select
         :items="categories"
@@ -65,13 +67,17 @@
         chips
         multiple
         variant="outlined"
+        item-title="name_translate"
+        item-value="uuid"
       ></v-select>
       <div class="w-full text-center d-flex gap-3 justify-space-around">
-        <DangerBtn color="red" @click="onDeletePost"> Delete Post </DangerBtn>
         <PrimaryBtn @click="savePost" class="px-4 py-3 w-25">Save</PrimaryBtn>
         <OutLineBtn @click="onCansel" class="px-4 py-3 w-25">
           Cansel
         </OutLineBtn>
+        <DangerBtn @click="onDeletePost" class="px-4 py-3 w-25">
+          Delete Post
+        </DangerBtn>
       </div>
     </v-form>
   </v-container>
@@ -98,12 +104,13 @@ const categoryStore = useCategoryStore();
 const postsStore = usePostStore();
 
 // Reactive Data
+const loading = ref<boolean>(true); // Loading state
 const status = ref<boolean>(true);
 const title = ref<string>("");
 const description = ref<string>("");
 const place = ref<string>("");
 const categories = ref<string[]>([]);
-const postCategories = ref<string[]>([]);
+const postCategories = ref<string>();
 const categoriesWant = ref<string[]>([]);
 const images = ref<{ file: File; url: string }[]>([]);
 const postData = ref<any>({});
@@ -115,22 +122,37 @@ onMounted(() => {
 
 // Fetch post data on mounted
 onMounted(async () => {
-  const postId = route.params.id as string;
-  const { success, data } = await postsStore.fetchPostById(postId);
-  if (success) {
-    postData.value = data;
-    title.value = data.post_name;
-    description.value = data.post_details;
-    place.value = data.place || "";
-    status.value = data.status === "1"; // Convert status to boolean
-    images.value = data.post_image.map((img: any) => ({
-      file: null, // Placeholder for file object
-      url: img.attachment,
-    }));
-    postCategories.value = data.favorite_categories || [];
-    categoriesWant.value = data.categoriesWant || [];
-  } else {
-    toast.error("Failed to fetch post data.");
+  try {
+    // Fetch categories
+
+    // Fetch post data
+    const postId = useRoute().params.id as string;
+    const { success, data } = await usePostStore().fetchPostById(postId);
+
+    if (success && data) {
+      postData.value = data.item;
+      categories.value = data.categories;
+
+      // Map post data to reactive variables
+      title.value = data.item.name;
+      description.value = data.item.details;
+      place.value = data.item.place || "";
+      status.value = data.item.status === "Active"; // Convert status to boolean
+      images.value = data.item.images.map((img: any) => ({
+        file: null, // Placeholder for file object
+        url: img.attachment,
+      }));
+      postCategories.value = data.item.category.uuid;
+      categoriesWant.value = data.item.fav_categories.map(
+        (cat: any) => cat.category_uuid
+      );
+    } else {
+      useToast().error("Failed to fetch post data.");
+    }
+  } catch (error) {
+    useToast().error("An error occurred while fetching data.");
+  } finally {
+    loading.value = false; // Stop loading spinner
   }
 });
 
@@ -168,7 +190,6 @@ const triggerFileInput = () => {
   fileInput?.click();
 };
 
-// Save Post
 const savePost = async () => {
   const formData = new FormData();
 
@@ -178,18 +199,43 @@ const savePost = async () => {
   formData.append("place", place.value);
   formData.append("status", status.value ? "1" : "0");
   formData.append("post_uuid", postData.value.uuid);
+  formData.append("category_uuid", postCategories.value);
 
   // Append images
-  images.value.forEach((image, index) => {
-    if (image.file) {
-      formData.append(`images[${index}]`, image.file);
+  if (images.value.some((image) => image.file)) {
+    // If new images are added, append the files
+    images.value.forEach((image, index) => {
+      if (image.file) {
+        formData.append(`images[${index}]`, image.file);
+      }
+    });
+  } else {
+    // If no new images are added, fetch the existing images as files and append them
+    for (const [index, image] of images.value.entries()) {
+      try {
+        const response = await fetch(image.url); // Fetch the image from the URL
+        const blob = await response.blob(); // Convert the image to a Blob
+        const file = new File([blob], `image-${index}.png`, {
+          type: blob.type,
+        }); // Convert Blob to File
+        formData.append(`images[${index}]`, file); // Append the File to FormData
+      } catch (error) {
+        console.error("Error fetching existing image:", error);
+        toast.error("Failed to process existing images.");
+        return;
+      }
     }
-  });
+  }
 
   // Append categories
-  postCategories.value.forEach((category, index) => {
+  categoriesWant.value.forEach((category, index) => {
     formData.append(`fcategory[${index}]`, category);
   });
+
+  // Log FormData contents for debugging
+  for (const [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
 
   // Update post
   const { success, message } = await postsStore.updatePost(

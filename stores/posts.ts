@@ -43,6 +43,8 @@ export const usePostStore = defineStore("posts", {
     categories: [] as Category[],
     topPosts: [] as Post[],
     myPosts: [] as Post[],
+    selectedCategory: null,
+    searchText: "",
   }),
 
   actions: {
@@ -274,7 +276,7 @@ export const usePostStore = defineStore("posts", {
       const config = useRuntimeConfig();
       try {
         const response: any = await $fetch(
-          `${config.public.API_BASE_URL}/post/${postId}`,
+          `${config.public.API_BASE_URL}/post/${postId}/edit`,
           {
             method: "GET",
             headers: {
@@ -327,6 +329,107 @@ export const usePostStore = defineStore("posts", {
       } catch (error) {
         console.error("Update Post Error:", error);
         return { success: false, message: "Failed to update post." };
+      }
+    },
+    async fetchCategories(): Promise<ApiResponse<any>> {
+      const authStore = useAuthStore();
+      const config = useRuntimeConfig();
+
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/see_all?type=category`,
+          {
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`,
+            },
+          }
+        );
+
+        if (response.status) {
+          this.categories = response.data; // Store categories in the state
+          return { success: true, message: "Categories fetched successfully." };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to fetch categories.",
+          };
+        }
+      } catch (error) {
+        console.error("Fetch Categories Error:", error);
+        return { success: false, message: "Failed to fetch categories." };
+      }
+    },
+
+    // Fetch posts by category UUID
+    async fetchPostsByCategory(
+      categoryUuid: string
+    ): Promise<ApiResponse<any>> {
+      const authStore = useAuthStore();
+      const config = useRuntimeConfig();
+
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/category/${categoryUuid}/posts`,
+          {
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`,
+            },
+          }
+        );
+        console.log(response.data.items);
+        
+        if (response.status) {
+          this.posts = response.data.items; // Store the posts in the state
+          return { success: true, message: "Posts fetched successfully." };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to fetch posts.",
+          };
+        }
+      } catch (error) {
+        console.error("Fetch Posts by Category Error:", error);
+        return { success: false, message: "Failed to fetch posts." };
+      }
+    },
+
+    // Search posts by search term and category UUID
+    async searchPosts({
+      searchTerm,
+      categoryUuid,
+    }: {
+      searchTerm: string;
+      categoryUuid?: string;
+    }): Promise<ApiResponse<any>> {
+      const authStore = useAuthStore();
+      const config = useRuntimeConfig();
+
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/search`,
+          {
+            query: {
+              search: searchTerm,
+              category_uuid: categoryUuid,
+            },
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`,
+            },
+          }
+        );
+
+        if (response.status) {
+          this.posts = response.data; // Store search results in the state
+          return { success: true, message: "Posts searched successfully." };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to search posts.",
+          };
+        }
+      } catch (error) {
+        console.error("Search Posts Error:", error);
+        return { success: false, message: "Failed to search posts." };
       }
     },
   },

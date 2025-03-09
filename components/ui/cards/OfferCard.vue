@@ -18,14 +18,26 @@
         <h3 class="card__title">
           {{ titleFirstThreeWords }}
         </h3>
-
       </div>
       <p class="description_offer mt-2">{{ descriptionFirstEightWords }}</p>
     </div>
+
+    <!-- Overlay with edit button -->
+    <div v-if="showOverlay" class="overlay">
+      <button class="create_offer" @click="goToEditOffer">
+        <span>Edit Offer</span>
+      </button>
+    </div>
   </div>
 </template>
+
 <script lang="ts" setup>
+import { useAuthStore } from "@/stores/auth";
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+
+const authStore = useAuthStore();
+const router = useRouter();
 
 // Define props to receive data from the parent component
 const props = defineProps<{
@@ -34,7 +46,8 @@ const props = defineProps<{
   name: string;
   title: string;
   description: string;
-  index: number;
+  id: string;
+  userId: string;
 }>();
 
 // Computed property to get the first 3 words of the title
@@ -54,6 +67,16 @@ const descriptionFirstEightWords = computed(() => {
 });
 
 const isHovered = ref(false);
+
+// Computed property to determine if the overlay should be shown
+const showOverlay = computed(() => {
+  return isHovered.value && props.userId === authStore.user.uuid;
+});
+
+// Method to navigate to the edit offer page
+const goToEditOffer = () => {
+  router.push(`/offer/edit/${props.id}`);
+};
 </script>
 
 <style scoped>
@@ -99,10 +122,6 @@ const isHovered = ref(false);
   cursor: pointer;
   transition: background-color 0.3s;
 }
-/* .card .create_offer:hover {
-    background: #0065ff;
-    color: #ffffff;
-  } */
 .card .overlay .create_offer span {
   padding: 10px 20px;
   background: rgb(var(--v-theme-white));

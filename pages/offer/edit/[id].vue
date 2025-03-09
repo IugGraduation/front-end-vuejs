@@ -1,27 +1,19 @@
 <template>
   <v-container>
-    <h1>Add Offer</h1>
+    <h1>Update Offer</h1>
 
     <!-- Drag and Drop Area -->
     <div
-      class="drag-drop-area"
+      class="drag-drop-area py-10 mt-5"
       @dragover.prevent
       @drop.prevent="handleDrop"
       @click="triggerFileInput"
     >
-      <p v-if="images.length === 0">
-        Drag and drop images here or click to upload
-      </p>
-      <div v-if="images.length > 0" class="image-preview">
-        <div
-          v-for="(image, index) in images"
-          :key="index"
-          class="image-container"
-        >
-          <img :src="image.url" :alt="'Image ' + (index + 1)" />
-          <button @click="removeImage(index, $event)" class="remove-btn">
-            x
-          </button>
+      <p v-if="!image">Drag and drop an image here or click to upload</p>
+      <div v-if="image" class="image-preview">
+        <div class="image-container">
+          <img :src="image.url" alt="Uploaded Image" />
+          <button @click="removeImage($event)" class="remove-btn">x</button>
         </div>
       </div>
     </div>
@@ -32,19 +24,18 @@
       ref="fileInput"
       class="hidden-input"
       accept="image/*"
-      multiple
       required
       @change="handleFileChange"
     />
 
     <!-- Form Inputs -->
-    <v-form @submit.prevent="addOffer">
+    <v-form @submit.prevent="updateOffer" class="mt-5">
       <Title v-model="title" @validationError="handleTitleError" />
-      <PestBeterSpo v-model="place" @validationError="handlePlaceError" />
       <TextArea
         v-model="description"
         @validationError="handleDescriptionError"
       />
+      <PestBeterSpo v-model="place" @validationError="handlePlaceError" />
       <v-select
         :items="categories"
         v-model="selectedCategory"
@@ -52,29 +43,34 @@
         chips
         multiple
         variant="outlined"
+        selection-type="checkbox"
       ></v-select>
-      <div class="w-full text-center d-flex gap-3 justify-space-around">
-        <PrimaryBtn @click="submitForm" class="px-4 py-3 w-25">Save</PrimaryBtn>
-        <OutLineBtn @click="submitForm" class="px-4 py-3 w-25">
-          Delete
-        </OutLineBtn>
+
+      <div class="w-full text-center">
+        <PrimaryBtn class="px-7 py-3">Update Offer</PrimaryBtn>
       </div>
     </v-form>
   </v-container>
 </template>
+
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useToast } from "vue-toast-notification";
+import { navigateTo } from "nuxt/app";
+import { usePostStore } from "@/stores/posts"; // Import the offers store
+import { useOfferStore } from "@/stores/offers"; // Import the offers store
 import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
-import OutLineBtn from "../../components/ui/buttons/OutLineBtn.vue";
 import Title from "../../components/ui/inputs/Title.vue";
 import TextArea from "../../components/ui/inputs/TextArea.vue";
 import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
-import { useToast } from "vue-toast-notification";
-import { navigateTo } from "nuxt/app";
+
 // Access the current route
 const route = useRoute();
 const toast = useToast();
+const offerStore = useOfferStore(); // Initialize the offers store
+const postStore = usePostStore();
+
 // Reactive Data
 const title = ref<string>("");
 const titleError = ref<string>("");
@@ -82,45 +78,71 @@ const description = ref<string>("");
 const descriptionError = ref<string>("");
 const place = ref<string>("");
 const placeError = ref<string>("");
-const categories = ref(["Category 1", "Category 2", "Category 3"]);
-const selectedCategory = ref([]);
-const images = ref<{ file: File; url: string }[]>([]);
-const valid = ref(false); // Form validation state
-
-// Validation Errors
+const categories = ref([]);
+const selectedCategory = ref<string>();
+const image = ref<{ file: File; url: string } | null>(null); // Single image
 const validationErrors = ref<string[]>([]);
 
-// Rules for validation
-const rules = {
-  required: (value: string) => !!value || "This field is required",
-};
+onMounted(() => {
+  categories.value = postStore.categories;
+});
+// Fetch the existing offer data when the page loads
+onMounted(async () => {
+  const offerId = route.params.id as string; // Get the offer ID from the route
+  console.log(offerId);
+
+  try {
+    const response = await offerStore.fetchOfferById(offerId); // Fetch the offer data
+    console.log(response);
+
+    if (response.success && response.data) {
+      const offer = response.data;
+      title.value = offer.title;
+      description.value = offer.description;
+      place.value = offer.place;
+      selectedCategory.value = offer.categories || [];
+      if (offer.imageUrl) {
+        // If the offer has an existing image, pre-fill it
+        image.value = { file: new File([], ""), url: offer.imageUrl };
+      }
+    } else {
+      toast.error("Failed to fetch offer data.");
+    }
+  } catch (error) {
+    console.error("Error fetching offer:", error);
+    toast.error("An error occurred while fetching the offer.");
+  }
+});
 
 // File Handling
 const handleDrop = (event: DragEvent) => {
-  if (event.dataTransfer?.files) {
-    Array.from(event.dataTransfer.files).forEach((file) => addImage(file));
+  event.preventDefault();
+  if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
+    const file = event.dataTransfer.files[0]; // Take the first file only
+    addImage(file);
   }
 };
 
 const handleFileChange = (event: Event) => {
   const input = event.target as HTMLInputElement;
-  if (input.files) {
-    Array.from(input.files).forEach((file) => addImage(file));
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0]; // Take the first file only
+    addImage(file);
   }
 };
 
 const addImage = (file: File) => {
   const reader = new FileReader();
   reader.onload = () => {
-    images.value.push({ file, url: reader.result as string });
+    image.value = { file, url: reader.result as string }; // Store the single image
   };
   reader.readAsDataURL(file);
 };
 
-const removeImage = (index: number, event: MouseEvent) => {
+const removeImage = (event: MouseEvent) => {
   event.stopPropagation(); // Prevent triggering file input when clicking on remove button
-  images.value.splice(index, 1);
-  resetFileInput(); // Reset the file input after image removal
+  image.value = null; // Clear the image
+  resetFileInput(); // Reset the file input
 };
 
 // Trigger the file input click when the drag-and-drop area is clicked
@@ -140,41 +162,54 @@ const resetFileInput = () => {
 };
 
 // Form Submission
-const addOffer = () => {
+const updateOffer = async () => {
   // Reset previous errors
   validationErrors.value = [];
 
-  // Validate title
+  // Validate inputs
   if (!title.value.trim()) {
     validationErrors.value.push("Title is required.");
   }
   if (!place.value.trim()) {
     validationErrors.value.push("Place is required.");
   }
-
-  // Validate description
   if (!description.value.trim()) {
     validationErrors.value.push("Description is required.");
   }
 
-  // Validate images
-  if (images.value.length === 0) {
-    validationErrors.value.push("At least one image is required.");
+  // If there are validation errors, show a toast and return
+  if (validationErrors.value.length > 0) {
+    toast.error("Please fill in all required fields.");
+    return;
   }
 
-  // Log errors or success
-  if (validationErrors.value.length > 0) {
-    console.error("Validation Errors:", validationErrors.value);
-    toast.error("some inputs rqurired");
-  } else {
-    toast.success("success");
-    navigateTo("/posts/1");
-    console.log({
-      title: title.value,
-      description: description.value,
-      categories: selectedCategory.value,
-      images: images.value.map((image) => image.file.name),
-    });
+  // Prepare FormData for the API request
+  const formData = new FormData();
+  formData.append("title", title.value);
+  formData.append("place", place.value);
+  formData.append("details", description.value);
+  formData.append("category_uuid", selectedCategory.value.join(",")); // Assuming categories are sent as a comma-separated string
+  formData.append("post_uuid", route.params.id as string); // Add the post ID from the route
+
+  // Append the single image file to FormData (if a new image is uploaded)
+  if (image.value && image.value.file) {
+    formData.append("image", image.value.file);
+  }
+
+  try {
+    const offerId = route.params.offerId as string; // Get the offer ID from the route
+    // Call the updateOffer action from the store
+    const result = await offerStore.updateOffer(offerId, formData);
+
+    if (result.success) {
+      toast.success("Offer updated successfully!");
+      navigateTo(`/posts/${route.params.id}`); // Navigate back to the post details page
+    } else {
+      toast.error(result.message || "Failed to update offer.");
+    }
+  } catch (error) {
+    console.error("Error updating offer:", error);
+    toast.error("An error occurred while updating the offer.");
   }
 };
 </script>
@@ -183,51 +218,42 @@ const addOffer = () => {
 .drag-drop-area {
   border: 2px dashed #ccc;
   border-radius: 8px;
-  padding: 16px;
   text-align: center;
   cursor: pointer;
-  margin-bottom: 16px;
-}
-
-.hidden-input {
-  display: none;
 }
 
 .image-preview {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 16px;
+  justify-content: center;
+  align-items: center;
 }
 
 .image-container {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
 }
 
 .image-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 8px;
 }
 
 .remove-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  background-color: #f44336;
+  top: 0;
+  right: 0;
+  background: red;
+  color: white;
   border: none;
   border-radius: 50%;
-  color: white;
-  width: 24px;
-  height: 24px;
-  font-size: 14px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
 }
 
-v-form > * {
-  margin-bottom: 16px;
+.hidden-input {
+  display: none;
 }
 </style>
