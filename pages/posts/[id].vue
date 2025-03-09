@@ -104,7 +104,7 @@
                 </clipPath>
               </defs>
             </svg>
-            01/12/2024
+            {{ post.date }}
           </v-chip>
           <span class="date-text"></span>
         </div>

@@ -14,6 +14,7 @@ interface Post {
   offers: any[]; // Define a proper type for offers if possible
   num_offers: number;
   favorite_categories: Category[];
+  date: string;
 }
 
 interface Category {
@@ -131,6 +132,7 @@ export const usePostStore = defineStore("posts", {
           description: post.post_details,
           status: post.status,
           offers: post.offers,
+          date: post.date,
           num_offers: post.num_offers,
           favorite_categories: post.favorite_categories,
         };
@@ -142,24 +144,40 @@ export const usePostStore = defineStore("posts", {
       }
     },
 
-    async fetchMyPosts(): Promise<ApiResponse<void>> {
+    async fetchMyPosts(
+      page: number,
+      perPage: number
+    ): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
-
-      if (!authStore.user) {
-        return { success: false, message: "User not authenticated." };
-      }
-
+      const config = useRuntimeConfig();
       try {
-        this.myPosts = this.topPosts.filter(
-          (post) => post.userId === authStore.user.uuid
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/profile/posts?page=${page}&perPage=${perPage}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`, // Pass the auth token
+            },
+          }
         );
-        return { success: true };
+
+        if (response.status) {
+          return {
+            success: true,
+            data: response.data.items, // Array of posts
+            pages: response.pages, // Pagination metadata
+          };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to fetch posts.",
+          };
+        }
       } catch (error) {
-        console.error("Failed to fetch user posts", error);
-        return { success: false, message: "Failed to fetch user posts." };
+        console.error("Fetch My Posts Error:", error);
+        return { success: false, message: "Failed to fetch posts." };
       }
     },
-
     async addPost(formData: FormData): Promise<ApiResponse<void>> {
       const authStore = useAuthStore();
       console.log("from add post >> auth token", authStore.authToken);
@@ -192,16 +210,32 @@ export const usePostStore = defineStore("posts", {
       }
     },
 
-    async deletePost(postId) {
+    async deletePost(postId: string): Promise<ApiResponse<void>> {
       const authStore = useAuthStore();
-      if (!authStore.user) {
-        throw new Error("User not authenticated");
-      }
+      const config = useRuntimeConfig();
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/post/${postId}/delete`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`,
+            },
+          }
+        );
 
-      this.myPosts = this.myPosts.filter(
-        (post) => post.id !== postId || post.userId !== authStore.user.uuid
-      );
-      this.posts = this.posts.filter((post) => post.id !== postId);
+        if (response.status) {
+          return { success: true, message: "Post deleted successfully." };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to delete post.",
+          };
+        }
+      } catch (error) {
+        console.error("Delete Post Error:", error);
+        return { success: false, message: "Failed to delete post." };
+      }
     },
     async fetchAllPosts(page: number): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
@@ -235,20 +269,64 @@ export const usePostStore = defineStore("posts", {
         return { success: false, message: "Failed to fetch posts." };
       }
     },
-    async addOfferToPost(postId, offer) {
+    async fetchPostById(postId: string): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
-      if (!authStore.user) {
-        throw new Error("User not authenticated");
-      }
+      const config = useRuntimeConfig();
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/post/${postId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`,
+            },
+          }
+        );
 
-      const post = this.posts.find((post) => post.id === postId);
-      if (post) {
-        const newOffer = {
-          ...offer,
-          id: Date.now().toString(),
-          userId: authStore.user.uuid,
-        };
-        post.offers.push(newOffer);
+        if (response.status) {
+          return { success: true, data: response.data };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to fetch post.",
+          };
+        }
+      } catch (error) {
+        console.error("Fetch Post Error:", error);
+        return { success: false, message: "Failed to fetch post." };
+      }
+    },
+
+    // Update a post
+    async updatePost(
+      postId: string,
+      formData: FormData
+    ): Promise<ApiResponse<any>> {
+      const authStore = useAuthStore();
+      const config = useRuntimeConfig();
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/post/update`,
+          {
+            method: "POST",
+            body: formData,
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`,
+            },
+          }
+        );
+
+        if (response.status) {
+          return { success: true, message: "Post updated successfully." };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to update post.",
+          };
+        }
+      } catch (error) {
+        console.error("Update Post Error:", error);
+        return { success: false, message: "Failed to update post." };
       }
     },
   },

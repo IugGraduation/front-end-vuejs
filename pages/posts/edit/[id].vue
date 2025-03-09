@@ -1,14 +1,10 @@
 <template>
   <v-container>
     <div class="d-flex justify-space-between align-center">
-      <h1>Edit Offer</h1>
+      <h1>Edit Posts</h1>
       <div class="status">
-        <v-switch
-          color="primary"
-          v-model="status"
-          ></v-switch>
-          <!-- :label="status ? 'open' : 'close'" -->
-        </div>
+        <v-switch color="primary" v-model="status"></v-switch>
+      </div>
     </div>
 
     <!-- Drag and Drop Area -->
@@ -71,19 +67,22 @@
         variant="outlined"
       ></v-select>
       <div class="w-full text-center d-flex gap-3 justify-space-around">
+        <DangerBtn color="red" @click="onDeletePost"> Delete Post </DangerBtn>
         <PrimaryBtn @click="savePost" class="px-4 py-3 w-25">Save</PrimaryBtn>
-        <OutLineBtn @click="OnDeletPost" class="px-4 py-3 w-25">
-          Delete Post
+        <OutLineBtn @click="onCansel" class="px-4 py-3 w-25">
+          Cansel
         </OutLineBtn>
       </div>
     </v-form>
   </v-container>
 </template>
+
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import PrimaryBtn from "@/components/ui/buttons/PrimaryBtn.vue";
 import OutLineBtn from "@/components/ui/buttons/OutLineBtn.vue";
+import DangerBtn from "@/components/ui/buttons/DangerBtn.vue";
 import Title from "../../components/ui/inputs/Title.vue";
 import TextArea from "../../components/ui/inputs/TextArea.vue";
 import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
@@ -97,45 +96,43 @@ const route = useRoute();
 const toast = useToast();
 const categoryStore = useCategoryStore();
 const postsStore = usePostStore();
+
 // Reactive Data
 const status = ref<boolean>(true);
 const title = ref<string>("");
-const titleError = ref<string>("");
 const description = ref<string>("");
-const descriptionError = ref<string>("");
 const place = ref<string>("");
-const placeError = ref<string>("");
 const categories = ref<string[]>([]);
 const postCategories = ref<string[]>([]);
 const categoriesWant = ref<string[]>([]);
 const images = ref<{ file: File; url: string }[]>([]);
-const valid = ref(false); // Form validation state
-const postData = reactive({});
+const postData = ref<any>({});
+
+// Fetch categories on mounted
 onMounted(() => {
   categories.value = categoryStore.categories;
 });
 
+// Fetch post data on mounted
 onMounted(async () => {
-  postData.value = await postsStore.fetchOneMyPost(route.params.id);
-  title.value = postData.value.title;
-  description.value = postData.value.description;
-  images.value = postData.value.images;
-  categoriesWant.value = postData.value.categoriesWant;
-  postCategories.value = postData.value.postCategories;
-  place.value = postData.value.pestPlace;
-  if (postData.value.status == "open") {
-    status.value = true;
+  const postId = route.params.id as string;
+  const { success, data } = await postsStore.fetchPostById(postId);
+  if (success) {
+    postData.value = data;
+    title.value = data.post_name;
+    description.value = data.post_details;
+    place.value = data.place || "";
+    status.value = data.status === "1"; // Convert status to boolean
+    images.value = data.post_image.map((img: any) => ({
+      file: null, // Placeholder for file object
+      url: img.attachment,
+    }));
+    postCategories.value = data.favorite_categories || [];
+    categoriesWant.value = data.categoriesWant || [];
   } else {
-    status.value = false;
+    toast.error("Failed to fetch post data.");
   }
 });
-// Validation Errors
-const validationErrors = ref<string[]>([]);
-
-// Rules for validation
-const rules = {
-  required: (value: string) => !!value || "This field is required",
-};
 
 // File Handling
 const handleDrop = (event: DragEvent) => {
@@ -160,12 +157,10 @@ const editImage = (file: File) => {
 };
 
 const removeImage = (index: number, event: MouseEvent) => {
-  event.stopPropagation(); // Prevent triggering file input when clicking on remove button
+  event.stopPropagation();
   images.value.splice(index, 1);
-  resetFileInput(); // Reset the file input after image removal
 };
 
-// Trigger the file input click when the drag-and-drop area is clicked
 const triggerFileInput = () => {
   const fileInput = document.querySelector(
     'input[type="file"]'
@@ -173,73 +168,57 @@ const triggerFileInput = () => {
   fileInput?.click();
 };
 
-// Reset the file input to allow re-uploading the same file
-const resetFileInput = () => {
-  const fileInput = document.querySelector(
-    'input[type="file"]'
-  ) as HTMLInputElement;
-  fileInput.value = ""; // Reset the value of the input to allow selecting the same file again
-};
+// Save Post
+const savePost = async () => {
+  const formData = new FormData();
 
-// Form Submission
-const savePost = () => {
-  // Reset previous errors
-  validationErrors.value = [];
+  // Append text fields
+  formData.append("name", title.value);
+  formData.append("details", description.value);
+  formData.append("place", place.value);
+  formData.append("status", status.value ? "1" : "0");
+  formData.append("post_uuid", postData.value.uuid);
 
-  // Validate title
-  if (!title.value.trim()) {
-    validationErrors.value.push("Title is required.");
-  }
-  if (!place.value.trim()) {
-    validationErrors.value.push("Place is required.");
-  }
+  // Append images
+  images.value.forEach((image, index) => {
+    if (image.file) {
+      formData.append(`images[${index}]`, image.file);
+    }
+  });
 
-  // Validate description
-  if (!description.value.trim()) {
-    validationErrors.value.push("Description is required.");
-  }
+  // Append categories
+  postCategories.value.forEach((category, index) => {
+    formData.append(`fcategory[${index}]`, category);
+  });
 
-  // Validate images
-  if (images.value.length === 0) {
-    validationErrors.value.push("At least one image is required.");
-  }
-
-  // Log errors or success
-  if (validationErrors.value.length > 0) {
-    console.error("Validation Errors:", validationErrors.value);
-    toast.error("some inputs rqurired");
+  // Update post
+  const { success, message } = await postsStore.updatePost(
+    postData.value.uuid,
+    formData
+  );
+  if (success) {
+    toast.success(message || "Post updated successfully.");
+    navigateTo("/profile");
   } else {
-    toast.success("success");
-    navigateTo("/profile");
-    console.log({
-      title: title.value,
-      description: description.value,
-      images: images.value,
-      categoriesWant: categoriesWant.value,
-      postCategories: postCategories.value,
-      place: place.value,
-    });
-
-    postsStore.editPost(postData.value.id, {
-      title: title.value,
-      description: description.value,
-      images: images.value,
-      categoriesWant: categoriesWant.value,
-      postCategories: postCategories.value,
-      place: place.value,
-    });
+    toast.error(message || "Failed to update post.");
   }
 };
 
-const OnDeletPost = async () => {
-  console.log("delete", postData.value.id);
+// Delete Post
+const onDeletePost = async () => {
+  const postId = route.params.id as string; // Get the post ID from the route
+  const { success, message } = await postsStore.deletePost(postId);
 
-  await postsStore.deletePost(postData.value.id);
-  try {
-    navigateTo("/profile");
-  } catch (error) {
-    console.error("note delte");
+  if (success) {
+    toast.success(message || "Post deleted successfully.");
+    navigateTo("/profile"); // Redirect to the profile page after deletion
+  } else {
+    toast.error(message || "Failed to delete post.");
   }
+  // Cansel Post
+};
+const onCansel = async () => {
+  navigateTo("/profile"); // Redirect to the profile page after deletion
 };
 </script>
 

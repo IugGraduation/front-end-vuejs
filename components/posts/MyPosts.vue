@@ -5,6 +5,8 @@
         <h2>My Posts</h2>
       </v-col>
     </v-row>
+
+    <!-- Loading State -->
     <v-row v-if="isLoading">
       <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">
         <v-skeleton-loader
@@ -13,11 +15,19 @@
         ></v-skeleton-loader>
       </v-col>
     </v-row>
+
+    <!-- Error State -->
+    <v-row v-if="error">
+      <v-col cols="12" class="text-center">
+        <v-alert type="error">{{ error }}</v-alert>
+      </v-col>
+    </v-row>
+
+    <!-- Posts -->
     <v-row v-else>
-      <!-- Show Posts based on showAll state -->
       <v-col
         v-for="post in visiblePosts"
-        :key="post.id"
+        :key="post.uuid"
         cols="12"
         sm="6"
         md="4"
@@ -26,116 +36,87 @@
         class="post-card-wrapper mb-8"
       >
         <PostCard
-          :index="post.id"
-          :imageUrl="post.image"
-          :avatarUrl="post.avatarUrl"
-          :name="post.name"
-          :title="post.title"
+          :id="post.uuid"
+          :imageUrl="post.post_image"
+          :avatarUrl="post.user_image"
+          :name="post.user_name"
+          :title="post.post_name"
           :status="post.status"
-          :description="post.description"
-          :offers="post.offers ? post.offers.length : 0"
+          :description="post.post_details"
+          :offers="post.num_offers"
           :isMyPost="true"
         />
       </v-col>
+    </v-row>
+
+    <!-- Pagination -->
+    <v-row class="mb-8" v-if="totalPages > 1">
+      <v-pagination
+        v-model="page"
+        :length="totalPages"
+        rounded="circle"
+        class="mx-auto"
+        @update:modelValue="fetchPosts"
+      ></v-pagination>
     </v-row>
   </v-container>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import PostCard from "../ui/cards/PostCard.vue";
-import PrimaryBtn from "../ui/buttons/PrimaryBtn.vue";
 import { usePostStore } from "@/stores/posts";
 import { useAuthStore } from "@/stores/auth";
-// Define an array of Posts
-const postsStore = usePostStore();
-const authStore = useAuthStore();
-// defineProps({
-//   isLoading: {
-//     type: Boolean,
-//   },
-// });
+
+// Reactive state
 const isLoading = ref(false);
+const error = ref("");
 const posts = ref([]);
-onMounted(async () => {
-  isLoading.value = true;
-  fetchPosts();
-});
+const page = ref(1); // Current page
+const perPage = 9; // Number of posts per page
+const totalPages = ref(0); // Total number of pages
+
+const postStore = usePostStore();
+const authStore = useAuthStore();
+
+// Fetch posts function
 const fetchPosts = async () => {
+  isLoading.value = true;
+  error.value = "";
+
   try {
-    posts.value = await postsStore.fetcMyhPosts(authStore.user.id);
+    const { success, data, pages, message } = await postStore.fetchMyPosts(
+      page.value,
+      perPage
+    );
+    if (success) {
+      posts.value = data; // Assign the fetched posts
+      totalPages.value = pages?.last_page || 1; // Set total pages from API response
+    } else {
+      error.value = message || "Failed to fetch posts.";
+    }
+  } catch (err) {
+    console.error("Fetch My Posts Error:", err);
+    error.value = "An error occurred while fetching posts.";
+  } finally {
     isLoading.value = false;
-  } catch (error) {
-    console.error(error);
   }
 };
-// const Posts = [
-//   {
-//     image: "https://picsum.photos/500/300?image=232",
-//     avatarUrl: "https://randomuser.me/api/portraits/men/1.jpg",
-//     name: "John Doe",
-//     title: "Software Engineer",
-//     status: "opne",
-//     description: "A passionate software engineer with 5+ years of experience.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=233",
-//     avatarUrl: "https://randomuser.me/api/portraits/women/1.jpg",
-//     name: "Jane Smith",
-//     title: "Product Manager",
-//     status: "close",
-//     description: "Experienced product manager leading cross-functional teams.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=234",
-//     avatarUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-//     name: "Mark Wilson",
-//     title: "Data Scientist",
-//     status: "open",
-//     description:
-//       "Data scientist focused on machine learning and AI. Data scientist focused on machine learning and AI. Data scientist focused on machine learning and AI.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=235",
-//     avatarUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
-//     name: "Emily Davis",
-//     title: "UX Designer UX Designer UX Designer",
-//     status: "open",
-//     description:
-//       "Creative UX designer dedicated to crafting intuitive user interfaces.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=335",
-//     avatarUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
-//     name: "Emily Davis",
-//     title: "UX Designer",
-//     status: "open",
-//     description:
-//       "Creative UX designer dedicated to crafting intuitive user interfaces.",
-//   },
-//   {
-//     image: "https://picsum.photos/500/300?image=535",
-//     avatarUrl: "https://cdn.vuetifyjs.com/images/john.jpg",
-//     name: "Emily Davis",
-//     title: "UX Designer",
-//     status: "open",
-//     description:
-//       "Creative UX designer dedicated to crafting intuitive user interfaces.",
-//   },
-// ];
-// Reactive state for toggling 'See All'
-const showAll = ref(false);
 
-// Computed property to determine which Posts to show
-const visiblePosts = computed(() => {
-  // return showAll.value ? Posts : Posts.slice(0, 3); // Show first 4 Posts or all if showAll is true
-  return posts.value;
+// Fetch posts on mounted
+onMounted(() => {
+  fetchPosts();
 });
 
-// Function to toggle the visibility of Posts
-function toggleSeeAll() {
-  showAll.value = !showAll.value;
-}
+// Fetch posts when page changes
+watch(page, () => {
+  fetchPosts();
+});
+
+// Computed property to determine visible posts
+const visiblePosts = computed(() => {
+  return posts.value; // Show all posts for the current page
+});
 
 definePageMeta({
   layout: "default",
@@ -156,8 +137,6 @@ definePageMeta({
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.all-posts {
 }
 .v-skeleton-loader .v-skeleton-loader__image {
   border-radius: 23px 23px 0 0 !important;
