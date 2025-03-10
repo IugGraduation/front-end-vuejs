@@ -71,7 +71,13 @@
         item-value="uuid"
       ></v-select>
       <div class="w-full text-center d-flex gap-3 justify-space-around">
-        <PrimaryBtn @click="savePost" class="px-4 py-3 w-25">Save</PrimaryBtn>
+        <PrimaryBtn
+          @click="savePost"
+          class="px-4 py-3 w-25"
+          :disabled="isSubmitting"
+        >
+          Save
+        </PrimaryBtn>
         <OutLineBtn @click="onCansel" class="px-4 py-3 w-25">
           Cansel
         </OutLineBtn>
@@ -114,6 +120,7 @@ const postCategories = ref<string>();
 const categoriesWant = ref<string[]>([]);
 const images = ref<{ file: File; url: string }[]>([]);
 const postData = ref<any>({});
+const isSubmitting = ref<boolean>(false); // Track submission state
 
 // Fetch categories on mounted
 onMounted(() => {
@@ -130,20 +137,20 @@ onMounted(async () => {
     const { success, data } = await usePostStore().fetchPostById(postId);
 
     if (success && data) {
-      postData.value = data.item;
+      postData.value = data;
       categories.value = data.categories;
 
       // Map post data to reactive variables
-      title.value = data.item.name;
-      description.value = data.item.details;
-      place.value = data.item.place || "";
-      status.value = data.item.status === "Active"; // Convert status to boolean
-      images.value = data.item.images.map((img: any) => ({
+      title.value = data.name;
+      description.value = data.details;
+      place.value = data.place || "";
+      status.value = data.status === "Active"; // Convert status to boolean
+      images.value = data.images.map((img: any) => ({
         file: null, // Placeholder for file object
         url: img.attachment,
       }));
-      postCategories.value = data.item.category.uuid;
-      categoriesWant.value = data.item.fav_categories.map(
+      postCategories.value = data.category.uuid;
+      categoriesWant.value = data.fav_categories.map(
         (cat: any) => cat.category_uuid
       );
     } else {
@@ -191,6 +198,8 @@ const triggerFileInput = () => {
 };
 
 const savePost = async () => {
+  isSubmitting.value = true; // Disable the button
+
   const formData = new FormData();
 
   // Append text fields
@@ -222,6 +231,7 @@ const savePost = async () => {
       } catch (error) {
         console.error("Error fetching existing image:", error);
         toast.error("Failed to process existing images.");
+        isSubmitting.value = false; // Re-enable the button
         return;
       }
     }
@@ -244,10 +254,12 @@ const savePost = async () => {
   );
   if (success) {
     toast.success(message || "Post updated successfully.");
-    navigateTo("/profile");
+    navigateTo("/profile", { replace: true }); // Redirect and replace history
   } else {
     toast.error(message || "Failed to update post.");
   }
+
+  isSubmitting.value = false; // Re-enable the button
 };
 
 // Delete Post
@@ -257,14 +269,15 @@ const onDeletePost = async () => {
 
   if (success) {
     toast.success(message || "Post deleted successfully.");
-    navigateTo("/profile"); // Redirect to the profile page after deletion
+    navigateTo("/profile", { replace: true }); // Redirect and replace history
   } else {
     toast.error(message || "Failed to delete post.");
   }
-  // Cansel Post
 };
+
+// Cancel Post
 const onCansel = async () => {
-  navigateTo("/profile"); // Redirect to the profile page after deletion
+  navigateTo("/profile", { replace: true }); // Redirect and replace history
 };
 </script>
 

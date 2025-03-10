@@ -19,6 +19,7 @@
           :status="post.status"
           :description="post.post_details"
           :num_offers="post.num_offers"
+          :isMyPost="authStore.user.uuid == post.user_uuid"
         />
       </v-col>
     </v-row>
@@ -29,7 +30,7 @@
         v-model="page"
         :length="totalPages"
         rounded="circle"
-        class="mx-auto"
+        class="mx-auto w-100"
         @update:modelValue="fetchPosts"
       ></v-pagination>
     </v-row>
@@ -57,6 +58,8 @@
 import { ref, onMounted, watch } from "vue";
 import PostCard from "@/components/ui/cards/PostCard.vue"; // Adjust the import path as needed
 import { usePostStore } from "../../stores/posts";
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
 
 definePageMeta({
   middleware: "auth", // Restrict access to logged-in users

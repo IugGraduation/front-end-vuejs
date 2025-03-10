@@ -44,6 +44,8 @@
         multiple
         variant="outlined"
         selection-type="checkbox"
+                item-title="name_translate"
+        item-value="uuid"
       ></v-select>
 
       <div class="w-full text-center">
@@ -98,12 +100,12 @@ onMounted(async () => {
     if (response.success && response.data) {
       const offer = response.data;
       title.value = offer.title;
-      description.value = offer.description;
+      description.value = offer.details;
       place.value = offer.place;
-      selectedCategory.value = offer.categories || [];
-      if (offer.imageUrl) {
+      selectedCategory.value = offer.category_uuid || [];
+      if (offer.image) {
         // If the offer has an existing image, pre-fill it
-        image.value = { file: new File([], ""), url: offer.imageUrl };
+        image.value = { file: new File([], ""), url: offer.image };
       }
     } else {
       toast.error("Failed to fetch offer data.");

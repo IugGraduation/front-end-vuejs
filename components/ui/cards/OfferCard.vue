@@ -21,16 +21,17 @@
       </div>
       <p class="description_offer mt-2">{{ descriptionFirstEightWords }}</p>
     </div>
-
     <!-- Overlay with edit button -->
-    <div v-if="showOverlay" class="overlay">
-      <button class="create_offer" @click="goToEditOffer">
+    <div v-if="isHovered" class="overlay">
+      <button v-if="!isMyOffer" class="create_offer" @click="goToEditOffer">
         <span>Edit Offer</span>
+      </button>
+      <button v-else class="create_offer" @click="sendWhatsAppMessage">
+        <span>Send WhatsApp Message</span>
       </button>
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { useAuthStore } from "@/stores/auth";
 import { computed, ref } from "vue";
@@ -68,14 +69,25 @@ const descriptionFirstEightWords = computed(() => {
 
 const isHovered = ref(false);
 
-// Computed property to determine if the overlay should be shown
-const showOverlay = computed(() => {
-  return isHovered.value && props.userId === authStore.user.uuid;
+// Computed property to determine if the offer belongs to the logged-in user
+const isMyOffer = computed(() => {
+  return props.userId === authStore.user.uuid;
 });
 
 // Method to navigate to the edit offer page
 const goToEditOffer = () => {
   router.push(`/offer/edit/${props.id}`);
+};
+
+// Method to send WhatsApp message
+const sendWhatsAppMessage = () => {
+  // Replace with the actual phone number or logic to get the phone number
+  const phoneNumber = "+972594147887";
+  const message = `Hi, I'm interested in your offer: ${props.title}`;
+  const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+    message
+  )}`;
+  window.open(url, "_blank");
 };
 </script>
 

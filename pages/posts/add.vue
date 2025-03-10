@@ -1,24 +1,20 @@
 <template>
   <v-container>
     <h1>Add Posts</h1>
-
-    <!-- Drag and Drop Area -->
     <div
       class="drag-drop-area"
       @dragover.prevent
       @drop.prevent="handleDrop"
       @click="triggerFileInput"
     >
-      <p v-if="images.length === 0">
-        Drag and drop images here or click to upload
-      </p>
-      <div v-if="images.length > 0" class="image-preview">
+      <p v-if="!images.length">Drag and drop images here or click to upload</p>
+      <div v-if="images.length" class="image-preview">
         <div
           v-for="(image, index) in images"
           :key="index"
           class="image-container"
         >
-          <img :src="image.url" :alt="'Image ' + (index + 1)" />
+          <img :src="image.url" :alt="`Image ${index + 1}`" />
           <button @click="removeImage(index, $event)" class="remove-btn">
             x
           </button>
@@ -54,7 +50,7 @@
         variant="outlined"
         item-title="name"
         item-value="id"
-      ></v-select>
+      />
 
       <v-select
         :items="categories"
@@ -65,46 +61,49 @@
         variant="outlined"
         item-title="name"
         item-value="id"
-      ></v-select>
+      />
+
       <div class="w-full text-center">
-        <PrimaryBtn @click="submitForm" class="px-7 py-3">Add Post</PrimaryBtn>
+        <PrimaryBtn
+          :disabled="isSubmitting"
+          @click="submitForm"
+          class="px-7 py-3"
+        >
+          {{ isSubmitting ? "Submitting..." : "Add Post" }}
+        </PrimaryBtn>
       </div>
     </v-form>
   </v-container>
 </template>
+
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
-import Title from "../../components/ui/inputs/Title.vue";
-import TextArea from "../../components/ui/inputs/TextArea.vue";
-import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
+import { onMounted, ref } from "vue";
 import { useToast } from "vue-toast-notification";
 import { navigateTo } from "nuxt/app";
 import { useCategoryStore } from "@/stores/categories";
 import { usePostStore } from "@/stores/posts";
+import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
+import Title from "../../components/ui/inputs/Title.vue";
+import TextArea from "../../components/ui/inputs/TextArea.vue";
+import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
 
-// Access the current route
-const route = useRoute();
-const toast = useToast();
+// Stores
 const categoryStore = useCategoryStore();
 const postStore = usePostStore();
 
+// Toast
+const toast = useToast();
+
 // Reactive Data
-const title = ref<string>("");
-const titleError = ref<string>("");
-const description = ref<string>("");
-const descriptionError = ref<string>("");
-const place = ref<string>("");
-const placeError = ref<string>("");
+const title = ref("");
+const description = ref("");
+const place = ref("");
 const categories = ref([]);
 const postCategories = ref([]);
 const categoriesWant = ref([]);
 const images = ref<{ file: File; url: string }[]>([]);
-const valid = ref(false); // Form validation state
-
-// Validation Errors
 const validationErrors = ref<string[]>([]);
+const isSubmitting = ref(false); // Track submission state
 
 // Fetch categories on mount
 onMounted(() => {
@@ -117,14 +116,14 @@ onMounted(() => {
 // File Handling
 const handleDrop = (event: DragEvent) => {
   if (event.dataTransfer?.files) {
-    Array.from(event.dataTransfer.files).forEach((file) => addImage(file));
+    Array.from(event.dataTransfer.files).forEach(addImage);
   }
 };
 
 const handleFileChange = (event: Event) => {
   const input = event.target as HTMLInputElement;
   if (input.files) {
-    Array.from(input.files).forEach((file) => addImage(file));
+    Array.from(input.files).forEach(addImage);
   }
 };
 
@@ -137,12 +136,11 @@ const addImage = (file: File) => {
 };
 
 const removeImage = (index: number, event: MouseEvent) => {
-  event.stopPropagation(); // Prevent triggering file input when clicking on remove button
+  event.stopPropagation();
   images.value.splice(index, 1);
-  resetFileInput(); // Reset the file input after image removal
+  resetFileInput();
 };
 
-// Trigger the file input click when the drag-and-drop area is clicked
 const triggerFileInput = () => {
   const fileInput = document.querySelector(
     'input[type="file"]'
@@ -150,73 +148,64 @@ const triggerFileInput = () => {
   fileInput?.click();
 };
 
-// Reset the file input to allow re-uploading the same file
 const resetFileInput = () => {
   const fileInput = document.querySelector(
     'input[type="file"]'
   ) as HTMLInputElement;
-  fileInput.value = ""; // Reset the value of the input to allow selecting the same file again
+  fileInput.value = "";
 };
 
 // Form Submission
 const addPost = async () => {
-  // Reset previous errors
+  if (isSubmitting.value) return; // Prevent multiple submissions
+
+  isSubmitting.value = true; // Disable the button
   validationErrors.value = [];
 
-  // Validate title
-  if (!title.value.trim()) {
-    validationErrors.value.push("Title is required.");
-  }
-  if (!place.value.trim()) {
-    validationErrors.value.push("Place is required.");
-  }
-
-  // Validate description
-  if (!description.value.trim()) {
+  if (!title.value.trim()) validationErrors.value.push("Title is required.");
+  if (!place.value.trim()) validationErrors.value.push("Place is required.");
+  if (!description.value.trim())
     validationErrors.value.push("Description is required.");
-  }
-
-  // Validate images
-  if (images.value.length === 0) {
+  if (!images.value.length)
     validationErrors.value.push("At least one image is required.");
-  }
 
-  // Log errors or success
-  if (validationErrors.value.length > 0) {
+  if (validationErrors.value.length) {
     console.error("Validation Errors:", validationErrors.value);
     toast.error("Some inputs are required.");
-  } else {
-    try {
-      // Prepare FormData for the API request
-      const formData = new FormData();
+    isSubmitting.value = false; // Re-enable the button
+    return;
+  }
 
-      // Append text fields
-      formData.append("name", title.value);
-      formData.append("place", place.value);
-      formData.append("details", description.value);
-      formData.append("category_uuid", postCategories.value); // Assuming single category for now
-      categories.value.forEach((cat, index) => {
-        formData.append(`fcategory[${index}]`, cat.id); // Assuming single favorite category for now
-      });
+  try {
+    const formData = new FormData();
+    formData.append("name", title.value);
+    formData.append("place", place.value);
+    formData.append("details", description.value);
+    formData.append("category_uuid", postCategories.value);
 
-      // // Append images
-      images.value.forEach((image, index) => {
-        formData.append(`images[${index}]`, image.file);
-      });
+    categories.value.forEach((cat, index) => {
+      formData.append(`fcategory[${index}]`, cat.id);
+    });
 
-      // Call the store action to add the post
-      const response = await postStore.addPost(formData);
+    images.value.forEach((image, index) => {
+      formData.append(`images[${index}]`, image.file);
+    });
 
-      if (response.success) {
-        toast.success("Post added successfully!");
-        navigateTo("/"); // Redirect to profile or another page
-      } else {
-        toast.error(response.message || "Failed to add post.");
-      }
-    } catch (error) {
-      console.error("Error adding post:", error);
-      toast.error("An error occurred while adding the post.");
+    const response = await postStore.addPost(formData);
+
+    if (response.success) {
+      toast.success("Post added successfully!");
+      navigateTo("/"); // Redirect to the next page
+      // Prevent going back to this page
+      window.history.replaceState(null, "", "/");
+    } else {
+      toast.error(response.message || "Failed to add post.");
+      isSubmitting.value = false; // Re-enable the button
     }
+  } catch (error) {
+    console.error("Error adding post:", error);
+    toast.error("An error occurred while adding the post.");
+    isSubmitting.value = false; // Re-enable the button
   }
 };
 </script>

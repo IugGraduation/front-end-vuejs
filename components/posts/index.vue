@@ -34,6 +34,7 @@
           :status="post.status"
           :description="post.description"
           :num_offers="post.num_offers"
+          :isMyPost="authStore.user.uuid == post.userId"
         />
       </v-col>
     </v-row>
@@ -44,15 +45,17 @@
 import { ref, computed, onMounted } from "vue";
 import PostCard from "../ui/cards/PostCard.vue";
 import { usePostStore } from "@/stores/posts";
+import { useAuthStore } from "@/stores/auth";
 
 const postsStore = usePostStore();
+const authStore = useAuthStore();
 
 const posts = ref([{}]);
 
 watch(
   () => postsStore.topPosts,
   (newValue) => {
-    posts.value = postsStore.topPosts;
+    posts.value = newValue;
   },
   { deep: true, immediate: true }
 );

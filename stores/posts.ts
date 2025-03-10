@@ -166,7 +166,7 @@ export const usePostStore = defineStore("posts", {
         if (response.status) {
           return {
             success: true,
-            data: response.data.items, // Array of posts
+            data: response.data, // Array of posts
             pages: response.pages, // Pagination metadata
           };
         } else {
@@ -252,7 +252,7 @@ export const usePostStore = defineStore("posts", {
             },
           }
         );
-        console.log(response.pages);
+        console.log(response);
 
         if (response.status) {
           return {
@@ -376,11 +376,15 @@ export const usePostStore = defineStore("posts", {
             },
           }
         );
-        console.log(response.data.items);
-        
+        console.log(response.data);
+
         if (response.status) {
-          this.posts = response.data.items; // Store the posts in the state
-          return { success: true, message: "Posts fetched successfully." };
+          this.posts = response.data; // Store the posts in the state
+          return {
+            success: true,
+            message: "Posts fetched successfully.",
+            data: response.data,
+          };
         } else {
           return {
             success: false,
@@ -420,7 +424,11 @@ export const usePostStore = defineStore("posts", {
 
         if (response.status) {
           this.posts = response.data; // Store search results in the state
-          return { success: true, message: "Posts searched successfully." };
+          return {
+            success: true,
+            message: "Posts searched successfully.",
+            data: response.data,
+          };
         } else {
           return {
             success: false,

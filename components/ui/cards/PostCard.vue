@@ -8,7 +8,7 @@
     <div class="card__avatar-status">
       <div class="avtar">
         <v-avatar size="18">
-          <v-img alt="John" :src="avatarUrl"></v-img>
+          <v-img alt="John" :src="avatarUrl" class="h-100"></v-img>
         </v-avatar>
         <h5 class="avtar_name">{{ name }}</h5>
       </div>
@@ -117,7 +117,16 @@
         <span> Make Your Offer </span>
       </button>
     </NuxtLink>
-    <template v-if="!isMyPost">
+    <template v-if="isMyPost && !isProfilePage">
+      <div v-if="isHovered" class="overlay see-offers">
+        <NuxtLink :to="`/posts/${id}`">
+          <button class="create_offer">
+            <span> See Offers </span>
+          </button>
+        </NuxtLink>
+      </div>
+    </template>
+    <template v-else-if="!isMyPost">
       <div v-if="isHovered" class="overlay">
         <NuxtLink :to="`/posts/${id}`">
           <button class="create_offer">
@@ -139,7 +148,9 @@
 </template>
 <script lang="ts" setup>
 import { computed, ref } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 // Define props to receive data from the parent component
 const props = defineProps<{
   imageUrl: string;
@@ -175,8 +186,12 @@ const descriptionFirstEightWords = computed(() => {
   return props.description;
 });
 
-
 const isHovered = ref(false);
+
+const currentPath = route.path;
+
+// Check if the user is not on the profile page
+const isProfilePage = currentPath === "/profile"; // Adjust the path as needed
 </script>
 
 <style scoped>
@@ -211,6 +226,9 @@ const isHovered = ref(false);
   justify-content: center;
   border-radius: 16px;
   z-index: 1;
+}
+.card .overlay.see-offers {
+  background: #00dc8238;
 }
 .card .overlay .create_offer {
   padding: 10px 20px;

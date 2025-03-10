@@ -112,7 +112,7 @@ export const useOfferStore = defineStore("offers", {
         console.log(response);
         
         if (response.status) {
-          return { success: true, data: response.data };
+          return { success: true, data: response.data.item };
         } else {
           return {
             success: false,

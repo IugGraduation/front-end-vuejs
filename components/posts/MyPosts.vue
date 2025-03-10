@@ -44,7 +44,7 @@
           :status="post.status"
           :description="post.post_details"
           :offers="post.num_offers"
-          :isMyPost="true"
+          :isMyPost="authStore.user.uuid == post.user_uuid"
         />
       </v-col>
     </v-row>

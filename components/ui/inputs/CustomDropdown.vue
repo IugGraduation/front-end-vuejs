@@ -4,7 +4,7 @@
     <div class="dropdown-toggle" @click="toggleDropdown">
       <div class="selected-items">
         <span v-if="selectedOptions.length === 0" class="placeholder">
-          {{ placeholder }}
+          {{ label }}
         </span>
         <span v-else class="selected-tags">
           <span
@@ -13,7 +13,7 @@
             class="tag"
             @click.stop="removeOption(index)"
           >
-            {{ option }}
+            {{ getTitle(option) }}
             <span class="remove-tag">×</span>
           </span>
         </span>
@@ -33,10 +33,16 @@
         v-for="(option, index) in options"
         :key="index"
         @click="toggleOption(option)"
-        :class="{ selected: selectedOptions.includes(option) }"
+        :class="{ selected: isSelected(option) }"
         class="dropdown-item"
       >
-        {{ option }}
+        <input
+          type="checkbox"
+          :checked="isSelected(option)"
+          @click.stop
+          @change="toggleOption(option)"
+        />
+        {{ getTitle(option) }}
       </li>
     </ul>
   </div>
@@ -54,39 +60,59 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  placeholder: {
+  label: {
     type: String,
     default: "Select an option",
+  },
+  itemTitle: {
+    type: String,
+    default: "name",
+  },
+  itemValue: {
+    type: String,
+    default: "uuid",
   },
 });
 
 const emit = defineEmits(["update:modelValue", "select"]);
 
 const isOpen = ref(false);
-const selectedOptions = ref([...props.modelValue]); // Initialize with prop data
+const selectedOptions = ref([...props.modelValue]);
 const dropdownRef = ref(null);
 
-// Watch for changes in prop and update selectedOptions
+// Watch for external changes
 watch(
   () => props.modelValue,
   (newValue) => {
-    console.log('custome drop down menu new value watch',newValue);
-    
     selectedOptions.value = [...newValue];
   },
   { immediate: true }
 );
 
-// Toggle dropdown visibility
+// Toggle dropdown
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-// Toggle selection of an option
+// Get option title dynamically
+const getTitle = (option) => option[props.itemTitle];
+
+// Get option value dynamically
+const getValue = (option) => option[props.itemValue];
+
+// Check if option is selected
+const isSelected = (option) => {
+  return selectedOptions.value.some(
+    (item) => getValue(item) === getValue(option)
+  );
+};
+
+// Toggle option selection
 const toggleOption = (option) => {
-  if (selectedOptions.value.includes(option)) {
+  const exists = isSelected(option);
+  if (exists) {
     selectedOptions.value = selectedOptions.value.filter(
-      (item) => item !== option
+      (item) => getValue(item) !== getValue(option)
     );
   } else {
     selectedOptions.value.push(option);

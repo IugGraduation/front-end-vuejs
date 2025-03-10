@@ -215,6 +215,7 @@ onMounted(async () => {
   }
 });
 </script>
+
 <style scoped>
 .card__avatar-data {
   display: flex;
