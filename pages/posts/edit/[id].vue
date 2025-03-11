@@ -81,9 +81,9 @@
         <OutLineBtn @click="onCansel" class="px-4 py-3 w-25">
           Cansel
         </OutLineBtn>
-        <DangerBtn @click="onDeletePost" class="px-4 py-3 w-25">
+        <RedBtn @click="onDeletePost" class="px-4 py-3 w-25">
           Delete Post
-        </DangerBtn>
+        </RedBtn>
       </div>
     </v-form>
   </v-container>
@@ -93,8 +93,9 @@
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import PrimaryBtn from "@/components/ui/buttons/PrimaryBtn.vue";
+
 import OutLineBtn from "@/components/ui/buttons/OutLineBtn.vue";
-import DangerBtn from "@/components/ui/buttons/DangerBtn.vue";
+import RedBtn from "@/components/ui/buttons/RedBtn.vue";
 import Title from "../../components/ui/inputs/Title.vue";
 import TextArea from "../../components/ui/inputs/TextArea.vue";
 import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";

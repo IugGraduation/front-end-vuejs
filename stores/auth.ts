@@ -40,6 +40,12 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
+interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
 export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
     user: null,
@@ -127,6 +133,99 @@ export const useAuthStore = defineStore("auth", {
       this.mobile = null;
       localStorage.removeItem("auth");
       window.location.href = "/login";
+    },
+    async fetchProfile(userUuid: string): Promise<ApiResponse<User>> {
+      const config = useRuntimeConfig();
+
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/profile/${userUuid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.authToken}`, // Use the authToken from the store
+            },
+          }
+        );
+
+        if (response.status) {
+          return {
+            success: true,
+            message: "Profile fetched successfully.",
+            data: response.data.item,
+          };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to fetch profile.",
+          };
+        }
+      } catch (error) {
+        console.error("Fetch Profile Error:", error);
+        return { success: false, message: "Failed to fetch profile." };
+      }
+    },
+    async fetchProfile(userUuid: string): Promise<ApiResponse<User>> {
+      const config = useRuntimeConfig();
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/profile/${userUuid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.authToken}`,
+            },
+          }
+        );
+
+        if (response.status) {
+          return {
+            success: true,
+            message: "Profile fetched successfully.",
+            data: response.data.item,
+          };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to fetch profile.",
+          };
+        }
+      } catch (error) {
+        console.error("Fetch Profile Error:", error);
+        return { success: false, message: "Failed to fetch profile." };
+      }
+    },
+
+    // New updateProfile action
+    async updateProfile(payload: any): Promise<ApiResponse<any>> {
+      const config = useRuntimeConfig();
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/profile/update`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${this.authToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        if (response.status) {
+          return {
+            success: true,
+            message: "Profile updated successfully.",
+            data: response.data,
+          };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to update profile.",
+          };
+        }
+      } catch (error) {
+        console.error("Update Profile Error:", error);
+        return { success: false, message: "Failed to update profile." };
+      }
     },
   },
   persist: true,

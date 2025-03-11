@@ -29,7 +29,7 @@
     />
 
     <!-- Form Inputs -->
-    <v-form @submit.prevent="updateOffer" class="mt-5">
+    <v-form class="mt-5">
       <Title v-model="title" @validationError="handleTitleError" />
       <TextArea
         v-model="description"
@@ -44,12 +44,17 @@
         multiple
         variant="outlined"
         selection-type="checkbox"
-                item-title="name_translate"
+        item-title="name_translate"
         item-value="uuid"
       ></v-select>
 
       <div class="w-full text-center">
-        <PrimaryBtn class="px-7 py-3">Update Offer</PrimaryBtn>
+        <PrimaryBtn class="px-7 py-3 mx-3" @click="updateOffer"
+          >Update Offer</PrimaryBtn
+        >
+        <RedBtn class="px-7 py-3 mx-3" @click="onDeletePost">
+          Delete Post
+        </RedBtn>
       </div>
     </v-form>
   </v-container>
@@ -63,6 +68,8 @@ import { navigateTo } from "nuxt/app";
 import { usePostStore } from "@/stores/posts"; // Import the offers store
 import { useOfferStore } from "@/stores/offers"; // Import the offers store
 import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
+import RedBtn from "@/components/ui/buttons/RedBtn.vue";
+
 import Title from "../../components/ui/inputs/Title.vue";
 import TextArea from "../../components/ui/inputs/TextArea.vue";
 import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
@@ -190,7 +197,7 @@ const updateOffer = async () => {
   formData.append("title", title.value);
   formData.append("place", place.value);
   formData.append("details", description.value);
-  formData.append("category_uuid", selectedCategory.value.join(",")); // Assuming categories are sent as a comma-separated string
+  formData.append("category_uuid", selectedCategory.value[0].uuid); // Assuming categories are sent as a comma-separated string
   formData.append("post_uuid", route.params.id as string); // Add the post ID from the route
 
   // Append the single image file to FormData (if a new image is uploaded)
@@ -208,6 +215,25 @@ const updateOffer = async () => {
       navigateTo(`/posts/${route.params.id}`); // Navigate back to the post details page
     } else {
       toast.error(result.message || "Failed to update offer.");
+    }
+  } catch (error) {
+    console.error("Error updating offer:", error);
+    toast.error("An error occurred while updating the offer.");
+  }
+};
+
+
+const onDeletePost = () => {
+  try {
+    const offerId = route.params.offerId as string; // Get the offer ID from the route
+    // Call the updateOffer action from the store
+    const respons = offerStore.deleteOffer(offerId);
+
+    if (respons.success) {
+      toast.success("Offer updated successfully!");
+      navigateTo(`/posts/${route.params.id}`); // Navigate back to the post details page
+    } else {
+      toast.error(respons.message || "Failed to update offer.");
     }
   } catch (error) {
     console.error("Error updating offer:", error);

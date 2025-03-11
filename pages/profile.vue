@@ -3,41 +3,43 @@
     <div class="half-circle"></div>
 
     <!-- Profile Section -->
-    <v-row justify="center " class="mb-8">
-      <v-col cols="12" md="4">
+    <v-row justify="center" class="mb-8">
+      <v-col cols="12" md="4" class="text-center">
         <v-img
-          src="https://randomuser.me/api/portraits/men/1.jpg"
-          class="rounded-circle mx-auto image"
-          height="200px"
-          width="200px"
-          contain
+          :src="profileImage"
+          class="rounded-circle mx-auto"
+          height="200"
+          width="200"
+          cover
+          style="object-fit: cover"
         ></v-img>
       </v-col>
-      <v-col cols="12" md="8" class="d-flex flex-column justify-center">
+      <v-col
+        cols="12"
+        md="8"
+        class="d-flex flex-column justify-center text-center text-md-left"
+      >
         <div class="name">
           <h3>{{ name }}</h3>
         </div>
         <div class="bio">
-          <p>
-            {{ bio }}
-          </p>
+          <p>{{ bio || "No bio available." }}</p>
         </div>
       </v-col>
       <v-col cols="12" class="d-flex flex-column justify-center mt-7">
         <div class="anala mx-auto d-flex justify-center align-center">
           <div class="analitc">
-            <h5>93</h5>
-            <p>posts</p>
+            <h5>{{ posts }}</h5>
+            <p>Posts</p>
           </div>
           <div class="brack"></div>
           <div class="analitc">
-            <h5>22</h5>
+            <h5>{{ offers }}</h5>
             <p>Offers</p>
           </div>
           <div class="brack"></div>
-
           <div class="analitc">
-            <h5>5</h5>
+            <h5>{{ exchanges }}</h5>
             <p>Exchanges</p>
           </div>
         </div>
@@ -46,25 +48,29 @@
 
     <!-- Tabs for Posts, Offers, and Settings -->
     <v-tabs v-model="tab" align-tabs="center" hide-slider>
-      <v-tab value="information">information</v-tab>
+      <v-tab value="information">Information</v-tab>
       <v-tab value="posts">Posts</v-tab>
       <v-tab value="settings">Settings</v-tab>
     </v-tabs>
     <v-tabs-window v-model="tab">
       <v-tabs-window-item value="information">
-        <v-card-title>My information</v-card-title>
+        <v-card-title>My Information</v-card-title>
         <v-row class="mb-5">
           <v-col cols="12" md="4">
             <full-name v-model="name" :disabled="disabled" />
           </v-col>
           <v-col cols="12" md="4">
-            <phone-number v-model="phome" :disabled="disabled" />
+            <phone-number v-model="mobile" :disabled="disabled" />
           </v-col>
           <v-col cols="12" md="4">
-            <pest-beter-spo v-model="favoritePlace" :disabled="disabled" />
+            <pest-beter-spo v-model="place" :disabled="disabled" />
           </v-col>
           <v-col cols="12">
-            <TextArea v-model="bio" label="Bio" :disabled="disabled"></TextArea>
+            <text-area
+              v-model="bio"
+              label="Bio"
+              :disabled="disabled"
+            ></text-area>
           </v-col>
           <v-col cols="12" v-if="!disabled">
             <primary-btn
@@ -72,22 +78,23 @@
               class="mr-4 px-6 py-2 rounded-pill"
               @click="onSaveInformations"
             >
-              save</primary-btn
-            >
-            <OutLineBtn @click="onCancelSave" class="px-6 py-2 rounded-pill"> Cancel</OutLineBtn>
+              Save
+            </primary-btn>
+            <out-line-btn @click="onCancelSave" class="px-6 py-2 rounded-pill">
+              Cancel
+            </out-line-btn>
           </v-col>
         </v-row>
       </v-tabs-window-item>
       <v-tabs-window-item value="posts">
         <MyPosts />
       </v-tabs-window-item>
-
       <v-tabs-window-item value="settings">
         <v-card-title class="mb-5">Settings</v-card-title>
-        <Settings />
+        <settings />
       </v-tabs-window-item>
     </v-tabs-window>
-    <div class="edit" @click="onEditInformations" v-if="tab == 'information'">
+    <div class="edit" @click="onEditInformations" v-if="tab === 'information'">
       <svg
         width="24"
         height="24"
@@ -105,9 +112,8 @@
     </div>
   </v-container>
 </template>
-
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import FullName from "../components/ui/inputs/FullName.vue";
 import PestBeterSpo from "../components/ui/inputs/PestBeterSpo.vue";
 import PhoneNumber from "../components/ui/inputs/PhoneNumber.vue";
@@ -116,60 +122,84 @@ import MyPosts from "../components/posts/MyPosts.vue";
 import Settings from "../components/profile/Settings.vue";
 import PrimaryBtn from "../components/ui/buttons/PrimaryBtn.vue";
 import OutLineBtn from "@/components/ui/buttons/OutLineBtn.vue";
-({
-  layout: "default",
-  // Remove middleware temporarily to debug
-});
+import { useAuthStore } from "../stores/auth";
+
+const authStore = useAuthStore();
 
 // Profile Data
-const profileImage = "/path/to/profile-image.jpg"; // Replace with actual image path
-const name = ref("John Doe");
-const bio = ref(
-  `Lorem ipsum dolor sit amet consectetur adipisicing elit. Libero tempora  voluptatem sed aspernatur unde dolorem sunt, ea quae commodi ab laudantium provident, molestias similique odit quasi doloribus eaque perferendis? Amet.`
+const profileImage = ref(
+  "https://swapwise.shop/dashboard/app-assets/images/4367.jpg"
 );
-const favoritePlace = ref("Paris");
-const phome = ref("972599934662");
+const name = ref("user name");
+const bio = ref(null);
+const place = ref(null);
+const mobile = ref("05999999999");
+const posts = ref(0);
+const offers = ref(0);
+const exchanges = ref(0);
 const disabled = ref(true);
-
-// Posts and Offers Data
-const posts = ref([
-  { id: 1, title: "My First Post", content: "This is my first post content." },
-  {
-    id: 2,
-    title: "My Second Post",
-    content: "This is my second post content.",
-  },
-]);
-
-const offers = ref([
-  { id: 1, title: "Special Discount", details: "Get 50% off on all items." },
-  {
-    id: 2,
-    title: "Free Shipping",
-    details: "Free shipping on all orders above $100.",
-  },
-]);
 
 // Tab Management
 const tab = ref("posts");
 
-// Save Settings function
-const saveSettings = () => {
-  alert("Settings saved!");
-};
+// Edit and Save Functions
 const onEditInformations = () => {
   disabled.value = !disabled.value;
 };
-const onSaveInformations = () => {
+
+const onSaveInformations = async () => {
   if (!disabled.value) {
-    disabled.value = !disabled.value;
+    // Prepare the payload
+    const payload = [
+      { key: "image", type: "file", value: [profileImage.value] },
+      { key: "bio", value: bio.value, type: "text" },
+      { key: "place", value: place.value, type: "text" },
+      { key: "name", value: name.value, type: "text" },
+      { key: "mobile", value: mobile.value, type: "text" },
+    ];
+
+    // Call the updateProfile action
+    const response = await authStore.updateProfile(payload);
+
+    if (response.success) {
+      alert("Profile updated successfully!");
+      disabled.value = true; // Disable editing after saving
+    } else {
+      alert(`Failed to update profile: ${response.message}`);
+    }
   }
 };
+
 const onCancelSave = () => {
   disabled.value = true;
 };
-</script>
 
+// Fetch User Profile
+const fetchUserProfile = async () => {
+  const userUuid = authStore.user.uuid;
+  const response = await authStore.fetchProfile(userUuid);
+
+  if (response.success) {
+    const profileData = response.data;
+    name.value = profileData.name || "User";
+    bio.value = profileData.bio || "I am new User";
+    place.value = profileData.place || "Gaza";
+    mobile.value = profileData.mobile || "059*********";
+    posts.value = profileData.posts || "No Location";
+    offers.value = profileData.offers || "0";
+    profileImage.value =
+      profileData.image ||
+      "https://swapwise.shop/dashboard/app-assets/images/4367.jpg";
+  } else {
+    console.error("Failed to fetch profile:", response.message);
+  }
+};
+
+// Fetch profile data on component mount
+onMounted(() => {
+  fetchUserProfile();
+});
+</script>
 <style scoped>
 .v-tabs {
   margin-top: 20px;

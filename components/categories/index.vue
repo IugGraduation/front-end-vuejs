@@ -62,7 +62,11 @@ watch(
 const showAll = ref(false);
 
 const visibleCategories = computed(() => {
-  return postStore.categories;
+  if (!showAll.value) {
+    return postStore.categories.slice(0, 3);
+  } else {
+    return postStore.categories;
+  }
 });
 
 function toggleSeeAll() {

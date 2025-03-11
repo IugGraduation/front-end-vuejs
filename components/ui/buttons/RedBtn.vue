@@ -8,8 +8,8 @@
 button {
   text-align: center;
   border: 2px solid rgb(var(--v-theme-error));
-  background: rgb(var(--v-theme-white));
-  color: rgb(var(--v-theme-error));
+  background: rgb(var(--v-theme-error));
+  color: rgb(var(--v-theme-white));
   border-radius: 16px;
   cursor: pointer;
 }
