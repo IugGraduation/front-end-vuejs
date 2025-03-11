@@ -8,7 +8,7 @@
     <div class="card__avatar-status">
       <div class="avtar">
         <v-avatar size="18">
-          <v-img alt="John" :src="avatarUrl"></v-img>
+          <v-img :alt="name" :src="avatarUrl"></v-img>
         </v-avatar>
         <h5 class="avtar_name">{{ name }}</h5>
       </div>
@@ -49,6 +49,7 @@ const props = defineProps<{
   description: string;
   id: string;
   userId: string;
+  mobile: string;
 }>();
 
 // Computed property to get the first 3 words of the title
@@ -79,10 +80,34 @@ const goToEditOffer = () => {
   router.push(`/offer/edit/${props.id}`);
 };
 
-// Method to send WhatsApp message
+const normalizePhoneNumber = (phoneNumber: string) => {
+  // Remove any non-digit characters
+  const cleanedNumber = phoneNumber.replace(/\D/g, "");
+
+  // Check if the number starts with 059 or 056 (Palestinian local numbers)
+  if (cleanedNumber.startsWith("059") || cleanedNumber.startsWith("056")) {
+    return `+970${cleanedNumber.slice(1)}`;
+  }
+
+  // Check if the number starts with +970 or +972
+  if (cleanedNumber.startsWith("970") || cleanedNumber.startsWith("972")) {
+    return `+${cleanedNumber}`;
+  }
+
+  // Check if the number starts with 0 (local format)
+  if (cleanedNumber.startsWith("0")) {
+    return `+970${cleanedNumber.slice(1)}`;
+  }
+
+  // If the number doesn't match any of the above, assume it's already in international format
+  return `+${cleanedNumber}`;
+};
+
 const sendWhatsAppMessage = () => {
   // Replace with the actual phone number or logic to get the phone number
-  const phoneNumber = "+972594147887";
+  const rawPhoneNumber = props.mobile;
+  const phoneNumber = normalizePhoneNumber(rawPhoneNumber);
+
   const message = `Hi, I'm interested in your offer: ${props.title}`;
   const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
     message
@@ -104,7 +129,7 @@ const sendWhatsAppMessage = () => {
 .card:hover {
   transform: scale(1.05);
 }
-.card img {
+.card .card_image {
   max-height: 150px;
   min-height: 150px;
   background: white;

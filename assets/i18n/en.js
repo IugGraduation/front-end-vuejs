@@ -37,6 +37,7 @@ export default {
     new_password: "New Password",
     confirm_new_password: "Confirm New Password",
     submit: "Submit",
+    cancel: "Cancel",
     required: "This field is required",
     min_length: "Password must be at least 6 characters",
     number_required: "Password must contain at least one number",

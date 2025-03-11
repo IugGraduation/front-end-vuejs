@@ -6,7 +6,7 @@
       </v-col>
     </v-row>
     <pre></pre>
-    <v-row v-if="isLoading">
+    <v-row v-if="posts.length === 0">
       <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">
         <v-skeleton-loader
           class="border w-full rounded-xl overflow-hidden"
@@ -16,7 +16,7 @@
     </v-row>
     <v-row v-else>
       <v-col
-        v-for="post in visiblePosts"
+        v-for="post in posts"
         :key="post.id"
         cols="12"
         sm="6"
@@ -59,17 +59,6 @@ watch(
   },
   { deep: true, immediate: true }
 );
-const showAll = ref(false);
-
-const isLoading = computed(() => (visiblePosts.length == 0 ? true : false));
-
-const visiblePosts = computed(() => {
-  return posts.value;
-});
-
-function toggleSeeAll() {
-  showAll.value = !showAll.value;
-}
 
 definePageMeta({
   layout: "default",

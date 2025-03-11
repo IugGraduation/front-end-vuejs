@@ -3,6 +3,7 @@ import { useRouter } from "vue-router";
 import { useApi } from "../services/api";
 import { navigateTo, useRuntimeConfig } from "nuxt/app";
 import { useToast } from "vue-toast-notification";
+
 interface User {
   name: string;
   uuid: string;
@@ -57,6 +58,27 @@ export const useAuthStore = defineStore("auth", {
   }),
   getters: {},
   actions: {
+    // Initialize state from localStorage
+    initializeStore() {
+      const storedAuth = localStorage.getItem("auth");
+      if (storedAuth) {
+        const { user, authToken, isAuthenticated } = JSON.parse(storedAuth);
+        this.user = user;
+        this.authToken = authToken;
+        this.isAuthenticated = isAuthenticated;
+      }
+    },
+
+    // Save state to localStorage
+    saveToLocalStorage() {
+      const authState = {
+        user: this.user,
+        authToken: this.authToken,
+        isAuthenticated: this.isAuthenticated,
+      };
+      localStorage.setItem("auth", JSON.stringify(authState));
+    },
+
     async login(payload: LoginData): Promise<boolean> {
       const config = useRuntimeConfig();
       this.mobile = payload.mobile;
@@ -73,6 +95,7 @@ export const useAuthStore = defineStore("auth", {
           this.authToken = response.data.token;
           this.user = response.data;
           this.isAuthenticated = true;
+          this.saveToLocalStorage(); // Save to localStorage after login
           return true;
         }
       } catch (err: any) {
@@ -80,6 +103,7 @@ export const useAuthStore = defineStore("auth", {
       }
       return false;
     },
+
     async register(payload: RegisterData): Promise<boolean> {
       const config = useRuntimeConfig();
       this.mobile = payload.mobile;
@@ -102,6 +126,7 @@ export const useAuthStore = defineStore("auth", {
       }
       return false;
     },
+
     async verifyCode(payload: VerifyCodeData): Promise<boolean> {
       const config = useRuntimeConfig();
       try {
@@ -112,12 +137,12 @@ export const useAuthStore = defineStore("auth", {
             body: JSON.stringify(payload),
           }
         );
-        // console.log(response);
 
         if (response.status) {
           this.authToken = response.data.token;
           this.user = response.data;
           this.isAuthenticated = true;
+          this.saveToLocalStorage(); // Save to localStorage after verification
           return true;
         }
       } catch (err: any) {
@@ -127,6 +152,7 @@ export const useAuthStore = defineStore("auth", {
       }
       return false;
     },
+
     logout(): void {
       this.user = null;
       this.authToken = null;
@@ -194,7 +220,6 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // New updateProfile action
     async updateProfile(payload: any): Promise<ApiResponse<any>> {
       const config = useRuntimeConfig();
       try {
@@ -225,6 +250,38 @@ export const useAuthStore = defineStore("auth", {
       } catch (error) {
         console.error("Update Profile Error:", error);
         return { success: false, message: "Failed to update profile." };
+      }
+    },
+    async updatePassword(payload: any): Promise<ApiResponse<any>> {
+      const config = useRuntimeConfig();
+      try {
+        const response: any = await $fetch(
+          `${config.public.API_BASE_URL}/profile/update/password`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${this.authToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        if (response.status) {
+          return {
+            success: true,
+            message: "Password updated successfully.",
+            data: response.data,
+          };
+        } else {
+          return {
+            success: false,
+            message: response.message || "Failed to update password.",
+          };
+        }
+      } catch (error) {
+        console.error("Update Password Error:", error);
+        return { success: false, message: "Failed to update password." };
       }
     },
   },

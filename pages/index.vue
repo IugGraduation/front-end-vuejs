@@ -1,6 +1,6 @@
 <template>
   <div class="pa-5">
-    <SearchInput v-model="searchValue" />
+    <!-- <SearchInput v-model="searchValue" /> -->
     <Categories :isLoading />
     <Postes :isLoading />
 

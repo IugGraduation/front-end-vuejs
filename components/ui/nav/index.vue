@@ -31,7 +31,7 @@
     <v-spacer></v-spacer>
     <!-- User, Dark/Light, and Language Toggle -->
     <div class="d-flex align-center gap-3">
-      <NuxtLink :to="`/search`">
+      <NuxtLink :to="`/search`" class="search">
         <v-btn>
           <svg
             width="25"
@@ -138,9 +138,10 @@
     </div>
   </v-app-bar>
 </template>
+
 <script setup>
 import { navigateTo } from "nuxt/app";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useTheme } from "vuetify";
@@ -150,9 +151,7 @@ import { useAuthStore } from "../../../stores/auth";
 const theme = useTheme();
 const isDark = ref(false);
 const authStore = useAuthStore();
-console.log("authStore", authStore.user);
-
-const username = ref(authStore.user.name);
+const username = computed(() => authStore.user?.name || null); // Use computed to reactively access the username
 const menu = ref(false); // This will control the dropdown menu
 
 // Use I18n for locale management
@@ -210,5 +209,7 @@ const logout = () => {
 }
 .v-app-bar[data-theme="light"] {
   background-color: #ffffff;
+}
+.search svg path {
 }
 </style>

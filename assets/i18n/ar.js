@@ -37,6 +37,7 @@ export default {
     new_password: "كلمة المرور الجديدة",
     confirm_new_password: "تأكيد كلمة المرور الجديدة",
     submit: "إرسال",
+    cancel:"تراجع",
     required: "هذا الحقل مطلوب",
     min_length: "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
     number_required: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل",

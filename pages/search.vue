@@ -2,17 +2,17 @@
   <v-container>
     <div class="">
       <div class="search d-flex align-start justify-space-between">
-        <div class="w-75">
+        <div class="w-100">
           <SearchInput v-model="searchText" @input="handleSearchInput" />
         </div>
-        <div class="serach_filters w-25 mt-4">
+        <!-- <div class="serach_filters w-25 mt-4">
           <CustomDropDownMenu
             :options="filters"
             placeholder="Select an option"
             @select="handleSelect"
             v-model="selectedFilter"
           />
-        </div>
+        </div> -->
       </div>
       <v-row v-if="loading">
         <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">

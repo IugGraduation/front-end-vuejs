@@ -5,14 +5,14 @@
     <!-- Profile Section -->
     <v-row justify="center" class="mb-8">
       <v-col cols="12" md="4" class="text-center">
-        <v-img
+        <img
           :src="profileImage"
           class="rounded-circle mx-auto"
           height="200"
           width="200"
           cover
           style="object-fit: cover"
-        ></v-img>
+        />
       </v-col>
       <v-col
         cols="12"

@@ -111,12 +111,16 @@ export const usePostStore = defineStore("posts", {
 
     async fetchOnePost(postId: string): Promise<ApiResponse<Post>> {
       const config = useRuntimeConfig();
+      const authStore = useAuthStore();
 
       try {
         const { data: post } = await $fetch<Post>(
           `${config.public.API_BASE_URL}/post/${postId}`,
           {
             method: "GET",
+            headers: {
+              Authorization: `Bearer ${authStore.authToken}`, // Pass the auth token
+            },
           }
         );
 

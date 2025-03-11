@@ -37,11 +37,11 @@
 
     <!-- Loading State -->
     <v-row v-if="loading">
-      <v-col cols="12" class="text-center">
-        <v-progress-circular
-          indeterminate
-          color="primary"
-        ></v-progress-circular>
+      <v-col cols="12" md="4" v-for="i in 6" :key="i" class="rounded-xl">
+        <v-skeleton-loader
+          class="border w-full rounded-xl overflow-hidden"
+          type="image, paragraph"
+        ></v-skeleton-loader>
       </v-col>
     </v-row>
 

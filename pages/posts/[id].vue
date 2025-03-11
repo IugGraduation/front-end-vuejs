@@ -59,7 +59,7 @@
       <div class="card__avatar-data">
         <div class="avatar-section">
           <v-avatar size="44">
-            <v-img :alt="post.name" :src="post.avatarUrl"></v-img>
+            <img :alt="post.name" :src="post.avatarUrl" class="h-100" />
           </v-avatar>
           <h5 class="avatar-name">{{ post.name }}</h5>
         </div>
@@ -167,14 +167,12 @@
               :name="offer.user_name"
               :title="offer.title"
               :description="offer.details"
+              :mobile="offer.mobile"
           /></v-col>
         </v-row>
       </div>
       <!-- Add Offer Button -->
-      <div
-        class="add-offer-button"
-        v-if="post.userId !== authStore.user?.uuid"
-      >
+      <div class="add-offer-button" v-if="post.userId !== authStore.user?.uuid">
         <NuxtLink :to="`/offer/${post.id}`">
           <PrimaryBtn class="py-3 px-7 w-100">Add Offer</PrimaryBtn>
         </NuxtLink>

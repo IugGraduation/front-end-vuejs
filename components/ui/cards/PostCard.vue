@@ -8,7 +8,7 @@
     <div class="card__avatar-status">
       <div class="avtar">
         <v-avatar size="18">
-          <v-img alt="John" :src="avatarUrl" class="h-100"></v-img>
+          <img :alt="name" :src="avatarUrl" class="avtar_image" />
         </v-avatar>
         <h5 class="avtar_name">{{ name }}</h5>
       </div>
@@ -207,7 +207,7 @@ const isProfilePage = currentPath === "/profile"; // Adjust the path as needed
 .card:hover {
   transform: scale(1.05);
 }
-.card img {
+.card .card_image {
   max-height: 150px;
   min-height: 150px;
   background: white;
@@ -289,10 +289,10 @@ const isProfilePage = currentPath === "/profile"; // Adjust the path as needed
   align-items: center;
   gap: 6px;
 }
-.card .avtar .avtar_image {
-  width: 24px;
-  height: 24px;
+.card .avtar img {
+  height: 18px;
   background: white;
+  object-fit: cover;
   border-radius: 50%;
 }
 .card .avtar .avtar_name {
