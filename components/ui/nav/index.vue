@@ -32,7 +32,7 @@
     <!-- User, Dark/Light, and Language Toggle -->
     <div class="d-flex align-center gap-3">
       <NuxtLink :to="`/search`" class="search">
-        <v-btn>
+        <v-btn >
           <svg
             width="25"
             height="25"
@@ -127,14 +127,14 @@
       </v-btn>
 
       <!-- Language Toggle -->
-      <v-btn
+      <!-- <v-btn
         text
         @click="toggleLanguage"
         class="language-btn rounded"
         style="font-size: 14px; font-weight: bold"
       >
         {{ isRtl ? "AR" : "EN" }}
-      </v-btn>
+      </v-btn> -->
     </div>
   </v-app-bar>
 </template>

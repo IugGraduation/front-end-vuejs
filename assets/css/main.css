@@ -63,7 +63,6 @@ textarea {
   transition: border-color 0.3s ease, outline 0.3s ease;
 }
 
-/* Style for v-select */
 
 .input-container svg {
   position: absolute;
@@ -84,18 +83,18 @@ input::placeholder {
   outline: 1px solid rgb(var(--v-theme-error));
 }
 
-.rtl .input-container input,
-.rtl .input-container textarea {
+.rtl.input-container input,
+.rtl.input-container textarea {
   padding-right: 44px;
   padding-left: 0;
 }
 
-.rtl .input-container svg {
-  left: auto;
-  right: 12px;
+.rtl.input-container svg {
+  left: auto !important;
+  right: 12px !important;
   transform: scaleX(-1) translateY(-50%);
 }
-.rtl .input-container .showpassword {
+.rtl.input-container .showpassword {
   right: auto;
   left: 12px;
   transform: translateY(-50%);

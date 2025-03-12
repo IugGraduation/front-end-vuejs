@@ -116,4 +116,10 @@ svg circle,
 svg ellipse {
   stroke: rgb(var(--v-theme-blackTeriary));
 }
+.input-container svg {
+  position: absolute;
+  top: 29px;
+  left: 12px;
+  right: auto;
+}
 </style>

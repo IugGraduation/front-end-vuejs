@@ -6,12 +6,14 @@ import { ref } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { navigateTo } from "nuxt/app";
 import { useToast } from "vue-toast-notification";
+import { useI18n } from "vue-i18n";
 
 definePageMeta({
   layout: "blank",
 });
 
 const toast = useToast();
+const { t } = useI18n();
 
 const authStore = useAuthStore();
 const phone = ref<string>("");
@@ -66,31 +68,51 @@ const goToSignUp = () => {
 </script>
 
 <template>
-  <div class="auth-container d-flex">
-    <div class="left-side">
-      <img src="../assets/images/login.png" alt="login" />
-    </div>
-    <div class="right-side">
-      <form @submit.prevent="handleLogin">
-        <h2>Login</h2>
-        <PhoneNumber
-          v-model="phone"
-          @validationError="handleValidationErrorPhone"
-        />
-        <Password
-          v-model="password"
-          :label="$t('password')"
-          @validationError="handleValidationErrorPassword"
-        />
-        <PrimaryBtn type="submit">login</PrimaryBtn>
-      </form>
-      <div class="sign-up" @click="goToSignUp">
-        <p>Don’t have an account? <span color="primary">Sign up</span></p>
-      </div>
-    </div>
-  </div>
-</template>
+  <v-container>
+    <!-- Posts Header -->
+    <v-row class="d-flex justify-space-between">
+      <v-col cols="auto">
+        <h2>{{ $t('posts') }}</h2> <!-- Translated "Posts" -->
+      </v-col>
+    </v-row>
 
+    <!-- Loading State (Skeleton Loader) -->
+    <v-row v-if="posts.length === 0">
+      <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">
+        <v-skeleton-loader
+          class="border w-full rounded-xl overflow-hidden"
+          type="image, paragraph"
+        ></v-skeleton-loader>
+      </v-col>
+    </v-row>
+
+    <!-- Posts List -->
+    <v-row v-else>
+      <v-col
+        v-for="post in posts"
+        :key="post.id"
+        cols="12"
+        sm="6"
+        md="4"
+        lg="4"
+        xl="4"
+        class="post-card-wrapper mb-8"
+      >
+        <PostCard
+          :id="post.id"
+          :imageUrl="post.image"
+          :avatarUrl="post.avatarUrl"
+          :name="post.name"
+          :title="post.title"
+          :status="post.status"
+          :description="post.description"
+          :num_offers="post.num_offers"
+          :isMyPost="authStore.user.uuid == post.userId"
+        />
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
 <style scoped>
 .auth-container {
   display: flex;

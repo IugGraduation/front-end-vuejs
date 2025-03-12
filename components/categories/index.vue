@@ -1,16 +1,18 @@
 <template>
   <v-container>
+    <!-- Categories Header and "See All" Button -->
     <v-row class="d-flex justify-space-between">
       <v-col cols="auto">
-        <h2>Categories</h2>
+        <h2>{{ $t("categories") }}</h2>
       </v-col>
       <v-col cols="auto" v-show="!isLoading">
         <button @click="toggleSeeAll" class="see-all-btn" color="primary">
-          {{ showAll ? "See Less" : "See All" }}
+          {{ showAll ? $t("see_less") : $t("see_all") }}
         </button>
       </v-col>
     </v-row>
 
+    <!-- Loading State -->
     <v-row v-if="isLoading">
       <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">
         <v-skeleton-loader
@@ -19,6 +21,8 @@
         ></v-skeleton-loader>
       </v-col>
     </v-row>
+
+    <!-- Categories List -->
     <v-row v-else>
       <v-col
         v-for="(category, index) in visibleCategories"
@@ -45,13 +49,14 @@ import { ref, computed, onMounted, watch } from "vue";
 import categoryCard from "../ui/cards/CategoryCard.vue";
 import { useCategoryStore } from "@/stores/categories";
 import { usePostStore } from "../../stores/posts";
+import { useI18n } from "vue-i18n";
 
 const categoryStore = useCategoryStore();
 const postStore = usePostStore();
 
 const isLoading = ref(true);
 const categories = ref([]);
-
+const { t } = useI18n();
 watch(
   () => postStore.categories,
   (newValue) => {

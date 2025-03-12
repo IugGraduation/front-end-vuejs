@@ -44,7 +44,7 @@
         multiple
         variant="outlined"
         selection-type="checkbox"
-        item-title="name_translate"
+        item-title="name"
         item-value="uuid"
       ></v-select>
 
@@ -52,8 +52,8 @@
         <PrimaryBtn class="px-7 py-3 mx-3" @click="updateOffer"
           >Update Offer</PrimaryBtn
         >
-        <RedBtn class="px-7 py-3 mx-3" @click="onDeletePost">
-          Delete Post
+        <RedBtn class="px-7 py-3 mx-3" @click="onDeleteOffer">
+          Delete Offer
         </RedBtn>
       </div>
     </v-form>
@@ -222,8 +222,7 @@ const updateOffer = async () => {
   }
 };
 
-
-const onDeletePost = () => {
+const onDeleteOffer = () => {
   try {
     const offerId = route.params.offerId as string; // Get the offer ID from the route
     // Call the updateOffer action from the store

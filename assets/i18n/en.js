@@ -46,4 +46,12 @@ export default {
     passwords_do_not_match: "Passwords do not match",
     success: "Password reset successfully!",
   },
+  login: "Login",
+  sign_up_message: "Don’t have an account?",
+  sign_up: "Sign up",
+  categories: "Categories",
+  see_all: "See All",
+  see_less: "See Less",
+  posts: "Posts",
+
 };

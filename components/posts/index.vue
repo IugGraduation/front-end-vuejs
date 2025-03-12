@@ -1,11 +1,14 @@
 <template>
   <v-container>
+    <!-- Posts Header -->
     <v-row class="d-flex justify-space-between">
       <v-col cols="auto">
-        <h2>Posts</h2>
+        <h2>{{ $t("posts") }}</h2>
+        <!-- Translated "Posts" -->
       </v-col>
     </v-row>
-    <pre></pre>
+
+    <!-- Loading State (Skeleton Loader) -->
     <v-row v-if="posts.length === 0">
       <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">
         <v-skeleton-loader
@@ -14,6 +17,8 @@
         ></v-skeleton-loader>
       </v-col>
     </v-row>
+
+    <!-- Posts List -->
     <v-row v-else>
       <v-col
         v-for="post in posts"
@@ -40,17 +45,17 @@
     </v-row>
   </v-container>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import PostCard from "../ui/cards/PostCard.vue";
 import { usePostStore } from "@/stores/posts";
 import { useAuthStore } from "@/stores/auth";
-
+import { useI18n } from "vue-i18n";
 const postsStore = usePostStore();
 const authStore = useAuthStore();
 
 const posts = ref([{}]);
+const { t } = useI18n();
 
 watch(
   () => postsStore.topPosts,
