@@ -114,7 +114,6 @@
             </clipPath>
           </defs>
         </svg>
-        <span> Make Your Offer </span>
       </button>
     </NuxtLink>
     <template v-if="isMyPost && !isProfilePage">

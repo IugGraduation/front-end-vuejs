@@ -190,32 +190,10 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async updateProfile(payload) {
+    async updateProfile(formData) {
       const config = useRuntimeConfig();
-      console.log("update profile payload", payload);
-
-      const formData = new FormData();
-
-      // Append all fields to the FormData object
-      for (const key in payload) {
-        if (key === "image" && payload[key]) {
-          // If the image is a base64 string, convert it to a file
-          if (
-            typeof payload[key] === "string" &&
-            payload[key].startsWith("data:image")
-          ) {
-            const blob = await fetch(payload[key]).then((res) => res.blob());
-            formData.append(key, blob, "profile-image.png");
-          } else {
-            formData.append(key, payload[key]);
-          }
-        } else {
-          formData.append(key, payload[key]);
-        }
-      }
-
       try {
-        const response = await $fetch(
+        const response: any = await $fetch(
           `${config.public.API_BASE_URL}/profile/update`,
           {
             method: "POST",

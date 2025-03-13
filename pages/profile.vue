@@ -174,17 +174,23 @@ const onSaveInformations = async () => {
         return;
       }
 
-      // Prepare the payload
-      const payload = {
-        image: profileImage.value,
-        bio: bio.value,
-        place: place.value,
-        name: name.value,
-        mobile: mobile.value,
-      };
+      const formData = new FormData();
+      formData.append("name", name.value);
+      formData.append("bio", bio.value);
+      formData.append("place", place.value);
+      formData.append("mobile", mobile.value);
 
-      // Call the updateProfile action
-      const response = await authStore.updateProfile(payload);
+      // Ensure profileImage.value is a valid File object
+      if (profileImage.value && profileImage.value.file) {
+        formData.append("image", image.value.file);
+      }
+
+      // Debug FormData content
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await authStore.updateProfile(formData);
 
       if (response.success) {
         toast.success("Profile updated successfully!");

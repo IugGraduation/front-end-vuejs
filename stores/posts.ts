@@ -35,6 +35,7 @@ interface ApiResponse<T> {
   success: boolean;
   message?: string;
   data?: T;
+  pages?:Number;
 }
 
 export const usePostStore = defineStore("posts", {
@@ -186,7 +187,6 @@ export const usePostStore = defineStore("posts", {
     },
     async addPost(formData: FormData): Promise<ApiResponse<void>> {
       const authStore = useAuthStore();
-      console.log("from add post >> auth token", authStore.authToken);
 
       const config = useRuntimeConfig();
       try {
@@ -200,7 +200,6 @@ export const usePostStore = defineStore("posts", {
             },
           }
         );
-        console.log("respons from add posts", response);
 
         if (response.status) {
           return { success: true, message: "Post added successfully." };
@@ -256,7 +255,6 @@ export const usePostStore = defineStore("posts", {
             },
           }
         );
-        console.log(response);
 
         if (response.status) {
           return {
@@ -288,7 +286,6 @@ export const usePostStore = defineStore("posts", {
             },
           }
         );
-        console.log("edit", response);
 
         if (response.status) {
           return { success: true, data: response.data };
@@ -306,7 +303,6 @@ export const usePostStore = defineStore("posts", {
 
     // Update a post
     async updatePost(
-      postId: string,
       formData: FormData
     ): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
@@ -381,7 +377,6 @@ export const usePostStore = defineStore("posts", {
             },
           }
         );
-        console.log(response.data);
 
         if (response.status) {
           this.posts = response.data; // Store the posts in the state

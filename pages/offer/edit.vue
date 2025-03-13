@@ -54,7 +54,6 @@
         <OutLineBtn type="button" class="px-7 py-3 mx-3" @click="goBack">
           Cancel
         </OutLineBtn>
-        
       </div>
     </v-form>
   </v-container>

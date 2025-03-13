@@ -150,7 +150,7 @@ onMounted(async () => {
         file: null, // Placeholder for file object
         url: img.attachment,
       }));
-      postCategories.value = data.item.category.uuid;ي
+      postCategories.value = data.item.category.category_uuid;
       categoriesWant.value = data.item.fav_categories.map(
         (cat: any) => cat.category_uuid
       );
@@ -197,57 +197,44 @@ const triggerFileInput = () => {
   ) as HTMLInputElement;
   fileInput?.click();
 };
-
 const savePost = async () => {
   isSubmitting.value = true; // Disable the button
 
   const formData = new FormData();
 
   // Append text fields
-  formData.append("name", title.value);
-  formData.append("details", description.value);
-  formData.append("place", place.value);
-  formData.append("status", status.value ? "1" : "0");
-  formData.append("post_uuid", postData.value.uuid);
-  formData.append("category_uuid", postCategories.value);
+  console.log("name", title.value || ""); // Ensure name is not undefined
+  console.log("details", description.value || ""); // Ensure details is not undefined
+  console.log("place", place.value || ""); // Ensure place is not undefined
+  console.log("status", status.value ? "1" : "0"); // Ensure status is either "1" or "0"
+  console.log("post_uuid", postData.value.uuid || ""); // Ensure post_uuid is not undefined
+  console.log("category_uuid", postCategories.value || ""); // Ensure category_uuid is not undefined
+  formData.append("name", title.value || ""); // Ensure name is not undefined
+  formData.append("details", description.value || ""); // Ensure details is not undefined
+  formData.append("place", place.value || ""); // Ensure place is not undefined
+  formData.append("status", status.value ? "1" : "0"); // Ensure status is either "1" or "0"
+  formData.append("post_uuid", postData.value.uuid || ""); // Ensure post_uuid is not undefined
+  formData.append("category_uuid", postCategories.value || ""); // Ensure category_uuid is not undefined
 
   // Append images
-  if (images.value.some((image) => image.file)) {
-    // If new images are added, append the files
-    images.value.forEach((image, index) => {
-      if (image.file) {
-        formData.append(`images[${index}]`, image.file);
-      }
-    });
-  } else {
-    // If no new images are added, fetch the existing images as files and append them
-    for (const [index, image] of images.value.entries()) {
-      try {
-        const response = await fetch(image.url); // Fetch the image from the URL
-        const blob = await response.blob(); // Convert the image to a Blob
-        const file = new File([blob], `image-${index}.png`, {
-          type: blob.type,
-        }); // Convert Blob to File
-        formData.append(`images[${index}]`, file); // Append the File to FormData
-      } catch (error) {
-        console.error("Error fetching existing image:", error);
-        toast.error("Failed to process existing images.");
-        isSubmitting.value = false; // Re-enable the button
-        return;
-      }
+  images.value.forEach((image, index) => {
+    if (image.file) {
+      formData.append(`images[${index}]`, image.file); // Append image files
     }
-  }
-
-  // Append categories
-  categoriesWant.value.forEach((category, index) => {
-    formData.append(`fcategory[${index}]`, category);
   });
 
+  // Append categories (fcategory)
+  categoriesWant.value.forEach((category, index) => {
+    formData.append(`fcategory[${index}]`, category || ""); // Ensure category is not undefined
+  });
+
+  // Debug FormData content
+  for (const [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
   // Update post
-  const { success, message } = await postsStore.updatePost(
-    postData.value.uuid,
-    formData
-  );
+  const { success, message } = await postsStore.updatePost(formData);
   if (success) {
     toast.success(message || "Post updated successfully.");
     navigateTo("/profile", { replace: true }); // Redirect and replace history
@@ -257,7 +244,6 @@ const savePost = async () => {
 
   isSubmitting.value = false; // Re-enable the button
 };
-
 // Delete Post
 const onDeletePost = async () => {
   const postId = route.params.id as string; // Get the post ID from the route
