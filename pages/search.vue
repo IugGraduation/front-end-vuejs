@@ -5,17 +5,29 @@
         <div class="w-100">
           <SearchInput v-model="searchText" @input="handleSearchInput" />
         </div>
-        <!-- <div class="serach_filters w-25 mt-4">
-          <CustomDropDownMenu
-            :options="filters"
-            placeholder="Select an option"
-            @select="handleSelect"
-            v-model="selectedFilter"
-          />
-        </div> -->
+        <div class="serach_filters w-25 mt-4">
+          <v-select
+            :items="categories"
+            v-model="selectedCategory"
+            label="Categories"
+            chips
+            variant="outlined"
+            selection-type="checkbox"
+            item-title="name"
+            item-value="uuid"
+            @update:modelValue="handleCategoryChange"
+          ></v-select>
+        </div>
       </div>
       <v-row v-if="loading">
-        <v-col cols="12" md="4" v-for="i in 3" :key="i" class="rounded-xl">
+        <v-col
+          cols="12"
+          md="4"
+          sm="6"
+          v-for="i in 6"
+          :key="i"
+          class="rounded-xl"
+        >
           <v-skeleton-loader
             class="border w-full rounded-xl overflow-hidden"
             type="image, paragraph"
@@ -72,7 +84,6 @@ import { ref, computed, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { usePostStore } from "@/stores/posts";
 import SearchInput from "../components/ui/inputs/SearchInput.vue";
-import CustomDropDownMenu from "@/components/ui/inputs/CustomDropdown.vue";
 import PostCard from "@/components/ui/cards/PostCard.vue";
 import { useAuthStore } from "@/stores/auth";
 
@@ -80,12 +91,12 @@ const postStore = usePostStore();
 const authStore = useAuthStore();
 
 const route = useRoute();
-const selectedFilter = ref([]);
 const searchText = ref("");
 const posts = ref([]);
 const loading = ref(true);
 const currentPage = ref(1); // Track current page
 const totalPages = ref(1); // Track total number of pages
+const selectedCategory = ref(null);
 
 // Debounce function
 const debounce = (fn, delay) => {
@@ -104,18 +115,14 @@ const debounce = (fn, delay) => {
 const debouncedSearch = debounce(async () => {
   if (searchText.value.trim() === "") {
     currentPage.value = 1; // Reset to first page when search is cleared
-    await fetchAllPosts(currentPage.value);
+    await fetchPosts(currentPage.value);
   } else {
-    const selectedCategory =
-      selectedFilter.value.length > 0
-        ? postStore.categories.find((c) => c.name === selectedFilter.value[0])
-        : null;
-    const categoryUuid = selectedCategory ? selectedCategory.uuid : null;
     const response = await postStore.searchPosts({
       searchTerm: searchText.value,
-      categoryUuid,
-      page: currentPage.value,
+      categoryUuid: selectedCategory.value || null, // Extract UUID if selectedCategory is an object
+      page: currentPage.value, // Pass the current page
     });
+
     posts.value = response.data;
     totalPages.value = response.pages.last_page; // Update total pages from the response
   }
@@ -125,67 +132,65 @@ const debouncedSearch = debounce(async () => {
 const handleSearchInput = () => {
   debouncedSearch();
 };
-
 // Fetch categories on component mount
 onMounted(async () => {
   await postStore.fetchCategories();
 
-  // Initialize selected filter if category is in route query
+  // Initialize selected category if category is in route query
   if (route.query.category) {
-    const selectedCategory = postStore.categories.find(
+    const category = postStore.categories.find(
       (c) => c.uuid === route.query.category
     );
-    if (selectedCategory) {
-      selectedFilter.value = [selectedCategory.name];
-      await fetchPostsByCategory(selectedCategory.uuid, currentPage.value);
+    if (category) {
+      selectedCategory.value = category;
+      const { data } = await postStore.fetchPostsByCategory(
+        category.uuid,
+        currentPage.value
+      );
+      console.log(data);
+
+      posts.value = data;
     }
   } else {
-    await fetchAllPosts(currentPage.value);
+    await postStore.fetchPosts(currentPage.value);
   }
 });
 
 // Computed list of filter options
-const filters = computed(() =>
-  postStore.categories.map((category) => category.name)
-);
+const categories = computed(() => postStore.categories);
 
-// Handle category selection
-const handleSelect = async (option) => {
-  const selectedCategory = postStore.categories.find((c) => c.name === option);
-  if (selectedCategory) {
-    selectedFilter.value = [selectedCategory.name];
-    currentPage.value = 1; // Reset to first page when category changes
-    await fetchPostsByCategory(selectedCategory.uuid, currentPage.value);
-  }
+// Handle category change
+const handleCategoryChange = async (newCategory) => {
+  searchText.value = ""; // Clear search text when category changes
+  console.log("new cateogry", newCategory);
+
+  selectedCategory.value = newCategory;
+  currentPage.value = 1; // Reset to first page when category changes
+  await fetchPosts(currentPage.value);
 };
 
-// Fetch posts by category
-const fetchPostsByCategory = async (categoryUuid, page) => {
+// Fetch posts by category or all posts
+const fetchPosts = async (page) => {
   loading.value = true;
   try {
-    const response = await postStore.fetchPostsByCategory(categoryUuid, page);
+    let response;
+    if (selectedCategory.value) {
+      response = await postStore.fetchPostsByCategory(
+        selectedCategory.value,
+        page
+      );
+    } else {
+      response = await postStore.fetchAllPosts(page);
+    }
     if (response.success) {
       posts.value = response.data;
       totalPages.value = response.pages.last_page; // Update total pages from the response
     } else {
       console.error("Failed to fetch posts:", response.message);
     }
+    loading.value = false;
   } catch (error) {
     console.error("Error fetching posts:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Fetch all posts
-const fetchAllPosts = async (page) => {
-  loading.value = true;
-  try {
-    const response = await postStore.fetchAllPosts(page);
-    posts.value = response.data;
-    totalPages.value = response.pages.last_page; // Update total pages from the response
-  } catch (error) {
-    console.error("Error fetching all posts:", error);
   } finally {
     loading.value = false;
   }
@@ -194,48 +199,25 @@ const fetchAllPosts = async (page) => {
 // Handle page change
 const handlePageChange = (page) => {
   currentPage.value = page;
-  if (selectedFilter.value.length > 0) {
-    const selectedCategory = postStore.categories.find(
-      (c) => c.name === selectedFilter.value[0]
-    );
-    if (selectedCategory) {
-      fetchPostsByCategory(selectedCategory.uuid, page);
-    }
-  } else {
-    fetchAllPosts(page);
-  }
+  fetchPosts(page);
 };
 
-// Watch for changes in route query and update selectedFilter
+// Watch for changes in route query and update selectedCategory
 watch(
   () => route.query.category,
   async (newCategory) => {
     if (newCategory) {
-      const newCategoryc = postStore.categories.find(
-        (c) => c.uuid === newCategory
-      );
-      if (newCategoryc) {
-        selectedFilter.value = [newCategoryc.name];
-        await fetchPostsByCategory(newCategoryc.uuid, currentPage.value);
+      const category = postStore.categories.find((c) => c.uuid === newCategory);
+      if (category) {
+        selectedCategory.value = category;
+        const { data } = await postStore.fetchPostsByCategory(
+          category.uuid,
+          currentPage.value
+        );
+        posts.value = data;
       }
     }
   },
   { immediate: true }
 );
-
-// Watch for changes in selectedFilter
-watch(selectedFilter, async (newFilter) => {
-  if (newFilter.length > 0) {
-    const selectedCategory = postStore.categories.find(
-      (c) => c.name === newFilter[0]
-    );
-    if (selectedCategory) {
-      currentPage.value = 1; // Reset to first page when category changes
-      await fetchPostsByCategory(selectedCategory.uuid, currentPage.value);
-    }
-  } else {
-    currentPage.value = 1; // Reset to first page when no category is selected
-    await fetchAllPosts(currentPage.value);
-  }
-});
 </script>

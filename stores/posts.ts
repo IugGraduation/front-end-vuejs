@@ -35,7 +35,7 @@ interface ApiResponse<T> {
   success: boolean;
   message?: string;
   data?: T;
-  pages?:Number;
+  pages?: Number;
 }
 
 export const usePostStore = defineStore("posts", {
@@ -302,9 +302,7 @@ export const usePostStore = defineStore("posts", {
     },
 
     // Update a post
-    async updatePost(
-      formData: FormData
-    ): Promise<ApiResponse<any>> {
+    async updatePost(formData: FormData): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
       const config = useRuntimeConfig();
       try {
@@ -367,6 +365,7 @@ export const usePostStore = defineStore("posts", {
     ): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
       const config = useRuntimeConfig();
+      console.log("fetchPostsByCategory");
 
       try {
         const response: any = await $fetch(
@@ -384,6 +383,7 @@ export const usePostStore = defineStore("posts", {
             success: true,
             message: "Posts fetched successfully.",
             data: response.data,
+            pages: response.pages,
           };
         } else {
           return {
@@ -407,6 +407,7 @@ export const usePostStore = defineStore("posts", {
     }): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
       const config = useRuntimeConfig();
+      console.log("searchPosts");
 
       try {
         const response: any = await $fetch(
@@ -428,6 +429,7 @@ export const usePostStore = defineStore("posts", {
             success: true,
             message: "Posts searched successfully.",
             data: response.data,
+            pages: response.pages,
           };
         } else {
           return {
