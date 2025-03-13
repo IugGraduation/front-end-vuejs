@@ -161,7 +161,9 @@
           >
             <OfferCard
               :id="offer.uuid"
-              :userId="post.userId"
+              :postUserId="post.userId"
+              :postId="post.id"
+              :offerUserId="offer.user_uuid"
               :imageUrl="offer.image"
               :avatarUrl="offer.avatarUrl"
               :name="offer.user_name"
@@ -205,8 +207,6 @@ onMounted(async () => {
   const response = await postsStore.fetchOnePost(postId);
   postHasImages.value = response.data.image.length ? true : false;
   if (response.success) {
-    console.log(response);
-
     post.value = response.data;
   } else {
     toast.error("Error fetching post details.");

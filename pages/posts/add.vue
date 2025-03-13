@@ -43,17 +43,18 @@
       <PestBeterSpo v-model="place" @validationError="handlePlaceError" />
 
       <v-select
-        :items="categories"
+        :items="categoriesComputed"
         v-model="postCategories"
         label="Categories Of Your Post"
         chips
         variant="outlined"
         item-title="name"
         item-value="id"
+        bg-color="white"
       />
 
       <v-select
-        :items="categories"
+        :items="categoriesComputed"
         v-model="categoriesWant"
         label="Categories You Like"
         chips
@@ -61,6 +62,7 @@
         variant="outlined"
         item-title="name"
         item-value="id"
+        bg-color="white"
       />
 
       <div class="w-full text-center">
@@ -77,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useToast } from "vue-toast-notification";
 import { navigateTo } from "nuxt/app";
 import { useCategoryStore } from "@/stores/categories";
@@ -105,6 +107,12 @@ const images = ref<{ file: File; url: string }[]>([]);
 const validationErrors = ref<string[]>([]);
 const isSubmitting = ref(false); // Track submission state
 
+const categoriesComputed = computed(() => {
+  return postStore.categories.map((cat) => ({
+    name: cat.name,
+    id: cat.uuid,
+  }));
+});
 // Fetch categories on mount
 onMounted(() => {
   categories.value = postStore.categories.map((cat) => ({

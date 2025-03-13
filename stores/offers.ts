@@ -81,12 +81,14 @@ export const useOfferStore = defineStore("offers", {
         if (response.status) {
           return { success: true, message: "Offer deleted successfully." };
         } else {
+          console.log("delte offer", response, offerId);
           return {
             success: false,
             message: response.message || "Failed to delete offer.",
           };
         }
       } catch (error) {
+        console.log("delte offer", error);
         console.error("Delete Offer Error:", error);
         return { success: false, message: "Failed to delete offer." };
       }
@@ -110,7 +112,7 @@ export const useOfferStore = defineStore("offers", {
           }
         );
         console.log(response);
-        
+
         if (response.status) {
           return { success: true, data: response.data.item };
         } else {
@@ -130,16 +132,13 @@ export const useOfferStore = defineStore("offers", {
      * @param offerId - ID of the offer to update.
      * @param formData - FormData containing the updated offer details.
      */
-    async updateOffer(
-      offerId: string,
-      formData: FormData
-    ): Promise<ApiResponse<void>> {
+    async updateOffer(formData: FormData): Promise<ApiResponse<void>> {
       const authStore = useAuthStore();
       const config = useRuntimeConfig();
 
       try {
-        const response = await $fetch<ApiResponse<void>>(
-          `${config.public.API_BASE_URL}/offer/${offerId}/update`,
+        const response: any = await $fetch<ApiResponse<void>>(
+          `${config.public.API_BASE_URL}/offer/update`,
           {
             method: "POST",
             body: formData,
@@ -149,7 +148,7 @@ export const useOfferStore = defineStore("offers", {
           }
         );
 
-        if (response.success) {
+        if (response.status) {
           return { success: true, message: "Offer updated successfully." };
         } else {
           return {

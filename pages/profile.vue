@@ -5,6 +5,14 @@
     <!-- Profile Section -->
     <v-row justify="center" class="mb-8">
       <v-col cols="12" md="4" class="text-center">
+        <input
+          type="file"
+          ref="fileInput"
+          style="display: none"
+          @change="onImageChange"
+          accept="image/*"
+          :disabled="disabled"
+        />
         <img
           :src="profileImage"
           class="rounded-circle mx-auto"
@@ -12,6 +20,8 @@
           width="200"
           cover
           style="object-fit: cover"
+          :class="disabled ? 'cursor-default' : 'cursor-pointer'"
+          @click="onImageClick"
         />
       </v-col>
       <v-col
@@ -77,8 +87,9 @@
               color="primary"
               class="mr-4 px-6 py-2 rounded-pill"
               @click="onSaveInformations"
+              :disabled="isLoading"
             >
-              Save
+              {{ isLoading ? "Saving..." : "Save" }}
             </primary-btn>
             <out-line-btn @click="onCancelSave" class="px-6 py-2 rounded-pill">
               Cancel
@@ -94,11 +105,12 @@
         <settings />
       </v-tabs-window-item>
     </v-tabs-window>
-    <div class="edit" @click="onEditInformations" v-if="tab === 'information'">
+    <div @click="onEditInformations" v-if="tab === 'information'">
       <svg
+        v-if="disabled"
         width="24"
         height="24"
-        class="v-icon__svg"
+        class="v-icon__svg edit"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         role="img"
@@ -123,9 +135,11 @@ import Settings from "../components/profile/Settings.vue";
 import PrimaryBtn from "../components/ui/buttons/PrimaryBtn.vue";
 import OutLineBtn from "@/components/ui/buttons/OutLineBtn.vue";
 import { useAuthStore } from "../stores/auth";
+import { useToast } from "vue-toast-notification";
 
 const authStore = useAuthStore();
-
+const fileInput = ref(null);
+const toast = useToast();
 // Profile Data
 const profileImage = ref(
   "https://swapwise.shop/dashboard/app-assets/images/4367.jpg"
@@ -147,25 +161,41 @@ const onEditInformations = () => {
   disabled.value = !disabled.value;
 };
 
+const isLoading = ref(false);
+
 const onSaveInformations = async () => {
   if (!disabled.value) {
-    // Prepare the payload
-    const payload = [
-      { key: "image", type: "file", value: [profileImage.value] },
-      { key: "bio", value: bio.value, type: "text" },
-      { key: "place", value: place.value, type: "text" },
-      { key: "name", value: name.value, type: "text" },
-      { key: "mobile", value: mobile.value, type: "text" },
-    ];
+    isLoading.value = true; // Start loading
 
-    // Call the updateProfile action
-    const response = await authStore.updateProfile(payload);
+    try {
+      // Validate required fields
+      if (!name.value || !mobile.value) {
+        toast.error("Name and mobile number are required.");
+        return;
+      }
 
-    if (response.success) {
-      alert("Profile updated successfully!");
-      disabled.value = true; // Disable editing after saving
-    } else {
-      alert(`Failed to update profile: ${response.message}`);
+      // Prepare the payload
+      const payload = {
+        image: profileImage.value,
+        bio: bio.value,
+        place: place.value,
+        name: name.value,
+        mobile: mobile.value,
+      };
+
+      // Call the updateProfile action
+      const response = await authStore.updateProfile(payload);
+
+      if (response.success) {
+        toast.success("Profile updated successfully!");
+        disabled.value = true; // Disable editing after saving
+      } else {
+        toast.error(`Failed to update profile: ${response.message}`);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      isLoading.value = false; // Stop loading
     }
   }
 };
@@ -192,6 +222,35 @@ const fetchUserProfile = async () => {
       "https://swapwise.shop/dashboard/app-assets/images/4367.jpg";
   } else {
     console.error("Failed to fetch profile:", response.message);
+  }
+};
+
+// Image Change Handling
+const onImageClick = () => {
+  fileInput.value.click();
+};
+
+const onImageChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload a valid image file.");
+      return;
+    }
+
+    // Validate file size (e.g., 5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB.");
+      return;
+    }
+
+    // Read the file and set it as the profile image
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      profileImage.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 };
 

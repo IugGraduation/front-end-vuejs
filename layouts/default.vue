@@ -67,10 +67,5 @@ onBeforeMount(() => {
   changeLanguage(savedLang);
 });
 
-// Log user authentication status
-if (authStore.isAuthenticated) {
-  console.log("User is logged in:", authStore.user);
-} else {
-  console.log("User is not logged in");
-}
+
 </script>

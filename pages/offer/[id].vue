@@ -137,8 +137,6 @@ const resetFileInput = () => {
 
 // Form Submission
 const addOffer = async () => {
-  console.log("Form Submission");
-
   // Reset previous errors
   validationErrors.value = [];
 

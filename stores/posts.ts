@@ -288,6 +288,7 @@ export const usePostStore = defineStore("posts", {
             },
           }
         );
+        console.log("edit", response);
 
         if (response.status) {
           return { success: true, data: response.data };

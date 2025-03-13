@@ -162,36 +162,6 @@ export const useAuthStore = defineStore("auth", {
     },
     async fetchProfile(userUuid: string): Promise<ApiResponse<User>> {
       const config = useRuntimeConfig();
-
-      try {
-        const response: any = await $fetch(
-          `${config.public.API_BASE_URL}/profile/${userUuid}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.authToken}`, // Use the authToken from the store
-            },
-          }
-        );
-
-        if (response.status) {
-          return {
-            success: true,
-            message: "Profile fetched successfully.",
-            data: response.data.item,
-          };
-        } else {
-          return {
-            success: false,
-            message: response.message || "Failed to fetch profile.",
-          };
-        }
-      } catch (error) {
-        console.error("Fetch Profile Error:", error);
-        return { success: false, message: "Failed to fetch profile." };
-      }
-    },
-    async fetchProfile(userUuid: string): Promise<ApiResponse<User>> {
-      const config = useRuntimeConfig();
       try {
         const response: any = await $fetch(
           `${config.public.API_BASE_URL}/profile/${userUuid}`,
@@ -220,20 +190,43 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async updateProfile(payload: any): Promise<ApiResponse<any>> {
+    async updateProfile(payload) {
       const config = useRuntimeConfig();
+      console.log("update profile payload", payload);
+
+      const formData = new FormData();
+
+      // Append all fields to the FormData object
+      for (const key in payload) {
+        if (key === "image" && payload[key]) {
+          // If the image is a base64 string, convert it to a file
+          if (
+            typeof payload[key] === "string" &&
+            payload[key].startsWith("data:image")
+          ) {
+            const blob = await fetch(payload[key]).then((res) => res.blob());
+            formData.append(key, blob, "profile-image.png");
+          } else {
+            formData.append(key, payload[key]);
+          }
+        } else {
+          formData.append(key, payload[key]);
+        }
+      }
+
       try {
-        const response: any = await $fetch(
+        const response = await $fetch(
           `${config.public.API_BASE_URL}/profile/update`,
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${this.authToken}`,
-              "Content-Type": "application/json",
             },
-            body: JSON.stringify(payload),
+            body: formData,
           }
         );
+
+        console.log("update profile response", response);
 
         if (response.status) {
           return {

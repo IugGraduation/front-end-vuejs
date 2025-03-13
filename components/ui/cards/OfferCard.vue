@@ -22,11 +22,13 @@
       <p class="description_offer mt-2">{{ descriptionFirstEightWords }}</p>
     </div>
     <!-- Overlay with edit button -->
-    <div v-if="isHovered" class="overlay">
-      <button v-if="!isMyOffer" class="create_offer" @click="goToEditOffer">
+    <div v-if="isHovered && isMyOffer" class="overlay">
+      <button class="create_offer" @click="goToEditOffer">
         <span>Edit Offer</span>
       </button>
-      <button v-else class="create_offer" @click="sendWhatsAppMessage">
+    </div>
+    <div v-if="isHovered && isMyPost" class="overlay">
+      <button class="create_offer" @click="sendWhatsAppMessage">
         <span>Send WhatsApp Message</span>
       </button>
     </div>
@@ -34,6 +36,7 @@
 </template>
 <script lang="ts" setup>
 import { useAuthStore } from "@/stores/auth";
+import { navigateTo } from "nuxt/app";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -48,7 +51,9 @@ const props = defineProps<{
   title: string;
   description: string;
   id: string;
-  userId: string;
+  postUserId: string;
+  postId: string;
+  offerUserId: string;
   mobile: string;
 }>();
 
@@ -72,12 +77,21 @@ const isHovered = ref(false);
 
 // Computed property to determine if the offer belongs to the logged-in user
 const isMyOffer = computed(() => {
-  return props.userId === authStore.user.uuid;
+  return props.offerUserId === authStore.user.uuid;
+});
+const isMyPost = computed(() => {
+  return props.postUserId === authStore.user.uuid;
 });
 
 // Method to navigate to the edit offer page
 const goToEditOffer = () => {
-  router.push(`/offer/edit/${props.id}`);
+  navigateTo({
+    path: "/offer/edit",
+    query: {
+      offerId: props.id,
+      postId: props.postId,
+    },
+  });
 };
 
 const normalizePhoneNumber = (phoneNumber: string) => {

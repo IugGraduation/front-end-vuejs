@@ -2,7 +2,6 @@
   <v-container>
     <h1>Update Offer</h1>
 
-    <!-- Drag and Drop Area -->
     <div
       class="drag-drop-area py-10 mt-5"
       @dragover.prevent
@@ -18,7 +17,6 @@
       </div>
     </div>
 
-    <!-- Hidden File Input -->
     <input
       type="file"
       ref="fileInput"
@@ -28,8 +26,7 @@
       @change="handleFileChange"
     />
 
-    <!-- Form Inputs -->
-    <v-form class="mt-5">
+    <v-form class="mt-5" @submit.prevent>
       <Title v-model="title" @validationError="handleTitleError" />
       <TextArea
         v-model="description"
@@ -41,7 +38,6 @@
         v-model="selectedCategory"
         label="Categories"
         chips
-        multiple
         variant="outlined"
         selection-type="checkbox"
         item-title="name"
@@ -49,69 +45,68 @@
       ></v-select>
 
       <div class="w-full text-center">
-        <PrimaryBtn class="px-7 py-3 mx-3" @click="updateOffer"
-          >Update Offer</PrimaryBtn
-        >
-        <RedBtn class="px-7 py-3 mx-3" @click="onDeleteOffer">
+        <PrimaryBtn type="button" class="px-7 py-3 mx-3" @click="updateOffer">
+          Update Offer
+        </PrimaryBtn>
+        <RedBtn type="button" class="px-7 py-3 mx-3" @click="onDeleteOffer">
           Delete Offer
         </RedBtn>
+        <OutLineBtn type="button" class="px-7 py-3 mx-3" @click="goBack">
+          Cancel
+        </OutLineBtn>
       </div>
     </v-form>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useToast } from "vue-toast-notification";
 import { navigateTo } from "nuxt/app";
-import { usePostStore } from "@/stores/posts"; // Import the offers store
-import { useOfferStore } from "@/stores/offers"; // Import the offers store
+import { usePostStore } from "@/stores/posts";
+import { useOfferStore } from "@/stores/offers";
 import PrimaryBtn from "../../components/ui/buttons/PrimaryBtn.vue";
 import RedBtn from "@/components/ui/buttons/RedBtn.vue";
-
+import OutLineBtn from "@/components/ui/buttons/OutLineBtn.vue";
 import Title from "../../components/ui/inputs/Title.vue";
 import TextArea from "../../components/ui/inputs/TextArea.vue";
 import PestBeterSpo from "../../components/ui/inputs/PestBeterSpo.vue";
 
-// Access the current route
 const route = useRoute();
+const router = useRouter();
 const toast = useToast();
-const offerStore = useOfferStore(); // Initialize the offers store
+const offerStore = useOfferStore();
 const postStore = usePostStore();
 
-// Reactive Data
 const title = ref<string>("");
 const titleError = ref<string>("");
 const description = ref<string>("");
 const descriptionError = ref<string>("");
 const place = ref<string>("");
 const placeError = ref<string>("");
-const categories = ref([]);
-const selectedCategory = ref<string>();
-const image = ref<{ file: File; url: string } | null>(null); // Single image
+const selectedCategory = ref();
+const image = ref<{ file: File; url: string } | null>(null);
 const validationErrors = ref<string[]>([]);
 
-onMounted(() => {
-  categories.value = postStore.categories;
-});
-// Fetch the existing offer data when the page loads
-onMounted(async () => {
-  const offerId = route.params.id as string; // Get the offer ID from the route
-  console.log(offerId);
+const offerId = route.query.offerId as string;
+const postId = route.query.postId as string;
 
+const categories = computed(() => {
+  return postStore.categories;
+});
+
+onMounted(async () => {
   try {
-    const response = await offerStore.fetchOfferById(offerId); // Fetch the offer data
-    console.log(response);
+    const response = await offerStore.fetchOfferById(offerId);
 
     if (response.success && response.data) {
       const offer = response.data;
       title.value = offer.title;
       description.value = offer.details;
       place.value = offer.place;
-      selectedCategory.value = offer.category_uuid || [];
+      selectedCategory.value = offer.category_uuid;
       if (offer.image) {
-        // If the offer has an existing image, pre-fill it
         image.value = { file: new File([], ""), url: offer.image };
       }
     } else {
@@ -123,11 +118,10 @@ onMounted(async () => {
   }
 });
 
-// File Handling
 const handleDrop = (event: DragEvent) => {
   event.preventDefault();
   if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    const file = event.dataTransfer.files[0]; // Take the first file only
+    const file = event.dataTransfer.files[0];
     addImage(file);
   }
 };
@@ -135,7 +129,7 @@ const handleDrop = (event: DragEvent) => {
 const handleFileChange = (event: Event) => {
   const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {
-    const file = input.files[0]; // Take the first file only
+    const file = input.files[0];
     addImage(file);
   }
 };
@@ -143,18 +137,17 @@ const handleFileChange = (event: Event) => {
 const addImage = (file: File) => {
   const reader = new FileReader();
   reader.onload = () => {
-    image.value = { file, url: reader.result as string }; // Store the single image
+    image.value = { file, url: reader.result as string };
   };
   reader.readAsDataURL(file);
 };
 
 const removeImage = (event: MouseEvent) => {
-  event.stopPropagation(); // Prevent triggering file input when clicking on remove button
-  image.value = null; // Clear the image
-  resetFileInput(); // Reset the file input
+  event.stopPropagation();
+  image.value = null;
+  resetFileInput();
 };
 
-// Trigger the file input click when the drag-and-drop area is clicked
 const triggerFileInput = () => {
   const fileInput = document.querySelector(
     'input[type="file"]'
@@ -162,20 +155,16 @@ const triggerFileInput = () => {
   fileInput?.click();
 };
 
-// Reset the file input to allow re-uploading the same file
 const resetFileInput = () => {
   const fileInput = document.querySelector(
     'input[type="file"]'
   ) as HTMLInputElement;
-  fileInput.value = ""; // Reset the value of the input to allow selecting the same file again
+  fileInput.value = "";
 };
 
-// Form Submission
 const updateOffer = async () => {
-  // Reset previous errors
   validationErrors.value = [];
 
-  // Validate inputs
   if (!title.value.trim()) {
     validationErrors.value.push("Title is required.");
   }
@@ -186,33 +175,28 @@ const updateOffer = async () => {
     validationErrors.value.push("Description is required.");
   }
 
-  // If there are validation errors, show a toast and return
   if (validationErrors.value.length > 0) {
     toast.error("Please fill in all required fields.");
     return;
   }
 
-  // Prepare FormData for the API request
   const formData = new FormData();
   formData.append("title", title.value);
   formData.append("place", place.value);
   formData.append("details", description.value);
-  formData.append("category_uuid", selectedCategory.value[0].uuid); // Assuming categories are sent as a comma-separated string
-  formData.append("post_uuid", route.params.id as string); // Add the post ID from the route
+  formData.append("category_uuid", selectedCategory.value);
+  formData.append("offer_uuid", offerId);
 
-  // Append the single image file to FormData (if a new image is uploaded)
   if (image.value && image.value.file) {
     formData.append("image", image.value.file);
   }
 
   try {
-    const offerId = route.params.offerId as string; // Get the offer ID from the route
-    // Call the updateOffer action from the store
-    const result = await offerStore.updateOffer(offerId, formData);
+    const result = await offerStore.updateOffer(formData);
 
     if (result.success) {
       toast.success("Offer updated successfully!");
-      navigateTo(`/posts/${route.params.id}`); // Navigate back to the post details page
+      navigateTo(`/posts/${postId}`);
     } else {
       toast.error(result.message || "Failed to update offer.");
     }
@@ -222,25 +206,26 @@ const updateOffer = async () => {
   }
 };
 
-const onDeleteOffer = () => {
+const onDeleteOffer = async () => {
   try {
-    const offerId = route.params.offerId as string; // Get the offer ID from the route
-    // Call the updateOffer action from the store
-    const respons = offerStore.deleteOffer(offerId);
+    const respons = await offerStore.deleteOffer(offerId);
 
     if (respons.success) {
-      toast.success("Offer updated successfully!");
-      navigateTo(`/posts/${route.params.id}`); // Navigate back to the post details page
+      toast.success("Offer deleted successfully!");
+      navigateTo(`/posts/${postId}`);
     } else {
-      toast.error(respons.message || "Failed to update offer.");
+      toast.error(respons.message || "Failed to delete offer.");
     }
   } catch (error) {
-    console.error("Error updating offer:", error);
-    toast.error("An error occurred while updating the offer.");
+    console.error("Error deleting offer:", error);
+    toast.error("An error occurred while deleting the offer.");
   }
 };
-</script>
 
+const goBack = () => {
+  router.back();
+};
+</script>
 <style scoped>
 .drag-drop-area {
   border: 2px dashed #ccc;

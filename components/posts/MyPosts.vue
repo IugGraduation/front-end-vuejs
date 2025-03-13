@@ -83,7 +83,6 @@ const authStore = useAuthStore();
 const fetchPosts = async () => {
   isLoading.value = true;
   error.value = "";
-  console.log('from fetchposts');
   
   try {
     const { success, data, pages, message } = await postStore.fetchMyPosts(

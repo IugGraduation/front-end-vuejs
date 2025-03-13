@@ -1,43 +1,44 @@
 <template>
   <v-container>
-    <!-- Post Cards -->
-    <v-row>
-      <v-col
-        v-for="post in posts"
-        :key="post.uuid"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="4"
-      >
-        <PostCard
-          :id="post.uuid"
-          :imageUrl="post.post_image"
-          :avatarUrl="post.user_image"
-          :name="post.user_name"
-          :title="post.post_name"
-          :status="post.status"
-          :description="post.post_details"
-          :num_offers="post.num_offers"
-          :isMyPost="authStore.user.uuid == post.user_uuid"
-        />
-      </v-col>
-    </v-row>
+    <div v-if="!loading">
+      <!-- Post Cards -->
+      <v-row>
+        <v-col
+          v-for="post in posts"
+          :key="post.uuid"
+          cols="12"
+          sm="6"
+          md="4"
+          lg="4"
+        >
+          <PostCard
+            :id="post.uuid"
+            :imageUrl="post.post_image"
+            :avatarUrl="post.user_image"
+            :name="post.user_name"
+            :title="post.post_name"
+            :status="post.status"
+            :description="post.post_details"
+            :num_offers="post.num_offers"
+            :isMyPost="authStore.user.uuid == post.user_uuid"
+          />
+        </v-col>
+      </v-row>
 
-    <!-- Pagination -->
-    <v-row class="mb-8" v-if="totalPages > 1">
-      <v-pagination
-        v-model="page"
-        :length="totalPages"
-        rounded="circle"
-        class="mx-auto w-100"
-        @update:modelValue="fetchPosts"
-      ></v-pagination>
-    </v-row>
-
+      <!-- Pagination -->
+      <v-row class="mb-8" v-if="totalPages > 1">
+        <v-pagination
+          v-model="page"
+          :length="totalPages"
+          rounded="circle"
+          class="mx-auto w-100"
+          @update:modelValue="fetchPosts"
+        ></v-pagination>
+      </v-row>
+    </div>
     <!-- Loading State -->
     <v-row v-if="loading">
-      <v-col cols="12" md="4" v-for="i in 6" :key="i" class="rounded-xl">
+      <v-col cols="12" md="4" sm="6" v-for="i in 6" :key="i" class="rounded-xl">
         <v-skeleton-loader
           class="border w-full rounded-xl overflow-hidden"
           type="image, paragraph"
@@ -85,8 +86,6 @@ const fetchPosts = async () => {
       page.value
     );
     if (success) {
-      console.log("data from all posts page", data);
-
       posts.value = data; // Assign the array of posts
       totalPages.value = pages?.last_page || 1; // Use the last_page value from the API
     } else {

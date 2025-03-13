@@ -138,20 +138,20 @@ onMounted(async () => {
     const { success, data } = await usePostStore().fetchPostById(postId);
 
     if (success && data) {
-      postData.value = data;
+      postData.value = data.item;
       categories.value = data.categories;
 
       // Map post data to reactive variables
-      title.value = data.name;
-      description.value = data.details;
-      place.value = data.place || "";
-      status.value = data.status === "Active"; // Convert status to boolean
-      images.value = data.images.map((img: any) => ({
+      title.value = data.item.name;
+      description.value = data.item.details;
+      place.value = data.item.place || "";
+      status.value = data.item.status === "Active"; // Convert status to boolean
+      images.value = data.item.images.map((img: any) => ({
         file: null, // Placeholder for file object
         url: img.attachment,
       }));
-      postCategories.value = data.category.uuid;
-      categoriesWant.value = data.fav_categories.map(
+      postCategories.value = data.item.category.uuid;ي
+      categoriesWant.value = data.item.fav_categories.map(
         (cat: any) => cat.category_uuid
       );
     } else {
@@ -242,11 +242,6 @@ const savePost = async () => {
   categoriesWant.value.forEach((category, index) => {
     formData.append(`fcategory[${index}]`, category);
   });
-
-  // Log FormData contents for debugging
-  for (const [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
 
   // Update post
   const { success, message } = await postsStore.updatePost(
