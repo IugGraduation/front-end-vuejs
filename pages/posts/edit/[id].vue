@@ -203,12 +203,6 @@ const savePost = async () => {
   const formData = new FormData();
 
   // Append text fields
-  console.log("name", title.value || ""); // Ensure name is not undefined
-  console.log("details", description.value || ""); // Ensure details is not undefined
-  console.log("place", place.value || ""); // Ensure place is not undefined
-  console.log("status", status.value ? "1" : "0"); // Ensure status is either "1" or "0"
-  console.log("post_uuid", postData.value.uuid || ""); // Ensure post_uuid is not undefined
-  console.log("category_uuid", postCategories.value || ""); // Ensure category_uuid is not undefined
   formData.append("name", title.value || ""); // Ensure name is not undefined
   formData.append("details", description.value || ""); // Ensure details is not undefined
   formData.append("place", place.value || ""); // Ensure place is not undefined

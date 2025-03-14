@@ -5,7 +5,11 @@
       <v-col cols="auto">
         <h2>{{ $t("categories") }}</h2>
       </v-col>
-      <v-col cols="auto" v-show="!isLoading">
+      <v-col
+        cols="auto"
+        v-show="!isLoading"
+        v-if="postStore.categories.length > 3"
+      >
         <button @click="toggleSeeAll" class="see-all-btn" color="primary">
           {{ showAll ? $t("see_less") : $t("see_all") }}
         </button>

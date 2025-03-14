@@ -365,11 +365,10 @@ export const usePostStore = defineStore("posts", {
     ): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
       const config = useRuntimeConfig();
-      console.log("fetchPostsByCategory");
 
       try {
         const response: any = await $fetch(
-          `${config.public.API_BASE_URL}/category/${categoryUuid}/posts`,
+          `${config.public.API_BASE_URL}/category/${categoryUuid.uuid}/posts`,
           {
             headers: {
               Authorization: `Bearer ${authStore.authToken}`,
@@ -407,7 +406,6 @@ export const usePostStore = defineStore("posts", {
     }): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
       const config = useRuntimeConfig();
-      console.log("searchPosts");
 
       try {
         const response: any = await $fetch(
@@ -415,7 +413,7 @@ export const usePostStore = defineStore("posts", {
           {
             query: {
               search: searchTerm,
-              category_uuid: categoryUuid,
+              "category_uuid[0]": categoryUuid.uuid,
             },
             headers: {
               Authorization: `Bearer ${authStore.authToken}`,

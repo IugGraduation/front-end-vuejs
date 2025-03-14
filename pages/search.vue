@@ -5,6 +5,7 @@
         <div class="w-100">
           <SearchInput v-model="searchText" @input="handleSearchInput" />
         </div>
+
         <div class="serach_filters w-25 mt-4">
           <v-select
             :items="categories"
@@ -19,6 +20,7 @@
           ></v-select>
         </div>
       </div>
+
       <v-row v-if="loading">
         <v-col
           cols="12"
@@ -63,7 +65,6 @@
           />
         </v-col>
       </v-row>
-
       <!-- Pagination -->
       <v-row v-if="totalPages > 1 && posts.length !== 0" class="mt-4">
         <v-col cols="12" class="d-flex justify-center">
@@ -147,9 +148,10 @@ onMounted(async () => {
         category.uuid,
         currentPage.value
       );
-      console.log(data);
 
       posts.value = data;
+      loading.value = false;
+
     }
   } else {
     await postStore.fetchPosts(currentPage.value);
@@ -162,7 +164,6 @@ const categories = computed(() => postStore.categories);
 // Handle category change
 const handleCategoryChange = async (newCategory) => {
   searchText.value = ""; // Clear search text when category changes
-  console.log("new cateogry", newCategory);
 
   selectedCategory.value = newCategory;
   currentPage.value = 1; // Reset to first page when category changes
@@ -215,6 +216,7 @@ watch(
           currentPage.value
         );
         posts.value = data;
+        loading.value = false;
       }
     }
   },

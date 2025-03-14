@@ -81,7 +81,6 @@ export const useOfferStore = defineStore("offers", {
         if (response.status) {
           return { success: true, message: "Offer deleted successfully." };
         } else {
-          console.log("delte offer", response, offerId);
           return {
             success: false,
             message: response.message || "Failed to delete offer.",
@@ -111,7 +110,6 @@ export const useOfferStore = defineStore("offers", {
             },
           }
         );
-        console.log(response);
 
         if (response.status) {
           return { success: true, data: response.data.item };
