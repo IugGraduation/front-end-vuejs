@@ -25,6 +25,10 @@ export default defineNuxtConfig({
         },
       ],
     },
+    scrollBehavior(to, from, savedPosition) {
+      // Always scroll to the top of the page
+      return { top: 0 };
+    },
   },
   runtimeConfig: {
     public: {

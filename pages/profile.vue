@@ -124,6 +124,7 @@
     </div>
   </v-container>
 </template>
+
 <script setup>
 import { ref, onMounted } from "vue";
 import FullName from "../components/ui/inputs/FullName.vue";
@@ -140,10 +141,12 @@ import { useToast } from "vue-toast-notification";
 const authStore = useAuthStore();
 const fileInput = ref(null);
 const toast = useToast();
+
 // Profile Data
 const profileImage = ref(
   "https://swapwise.shop/dashboard/app-assets/images/4367.jpg"
 );
+const imageFile = ref(null); // Store the file object here
 const name = ref("user name");
 const bio = ref(null);
 const place = ref(null);
@@ -180,9 +183,9 @@ const onSaveInformations = async () => {
       formData.append("place", place.value);
       formData.append("mobile", mobile.value);
 
-      // Ensure profileImage.value is a valid File object
-      if (profileImage.value && profileImage.value.file) {
-        formData.append("image", image.value.file);
+      // Append the image file if it exists
+      if (imageFile.value) {
+        formData.append("image", imageFile.value);
       }
 
       // Debug FormData content
@@ -216,13 +219,13 @@ const fetchUserProfile = async () => {
   const response = await authStore.fetchProfile(userUuid);
 
   if (response.success) {
-    const profileData = response.data;
+    const profileData = response.data; // Handle empty data array
     name.value = profileData.name || "User";
     bio.value = profileData.bio || "I am new User";
     place.value = profileData.place || "Gaza";
     mobile.value = profileData.mobile || "059*********";
-    posts.value = profileData.posts || "No Location";
-    offers.value = profileData.offers || "0";
+    posts.value = profileData.posts || 0;
+    offers.value = profileData.offers || 0;
     profileImage.value =
       profileData.image ||
       "https://swapwise.shop/dashboard/app-assets/images/4367.jpg";
@@ -238,6 +241,8 @@ const onImageClick = () => {
 
 const onImageChange = (event) => {
   const file = event.target.files[0];
+  console.log(file);
+
   if (file) {
     // Validate file type
     if (!file.type.startsWith("image/")) {
@@ -254,9 +259,12 @@ const onImageChange = (event) => {
     // Read the file and set it as the profile image
     const reader = new FileReader();
     reader.onload = (e) => {
-      profileImage.value = e.target.result;
+      profileImage.value = e.target.result; // Set the image URL for preview
     };
     reader.readAsDataURL(file);
+
+    // Store the file object for FormData
+    imageFile.value = file;
   }
 };
 
@@ -278,6 +286,13 @@ onMounted(() => {
   left: 50%;
   top: 0;
   transform: translate(-50%);
+}
+/* Media query for medium screens (md) */
+@media (max-width: 960px) {
+  .half-circle {
+    width: 100%; /* Adjust width for medium screens */
+    height: 325px; /* Reduce height for medium screens */
+  }
 }
 .image {
   background: white;
