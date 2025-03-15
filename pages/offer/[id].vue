@@ -75,11 +75,6 @@ onMounted(async () => {
   }
 });
 
-const goToEditOffer = () => {
-  navigateTo({
-    path: `/offer/${offerId.value}/edit`,
-  });
-};
 const category = computed(() => {
   return postStore.categories.find((cat) => cat.uuid === offer.value.category_uuid);
 });
