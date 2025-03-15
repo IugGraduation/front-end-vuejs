@@ -61,7 +61,6 @@ const postStore = usePostStore();
 onMounted(async () => {
   imagesLoaded.value = true;
   offerId.value = route.params.id as string;
-
   try {
     const response = await offerStore.fetchOfferById(offerId.value);
 
