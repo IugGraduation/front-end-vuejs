@@ -1,39 +1,37 @@
+# SwapWise
 
-<a href="https://front-end-vuejs-git-master-moomenazzams-projects.vercel.app/login" style="color: red;">Demo</a>
+## Overview
+SwapWise is a platform that facilitates direct exchanges of goods and services among users, eliminating the need for traditional financial transactions. By leveraging modern technologies, it provides a secure and efficient environment where users can assign values to exchanged items based on their needs. This approach promotes a sustainable and cost-free exchange system.
 
+## Features
+- **Direct Exchange**: Users can swap goods and services without monetary transactions.
+- **Secure & Efficient**: Ensures safe interactions and value-based exchanges.
+- **Sustainability Focused**: Encourages resource reuse and economic sharing.
 
-# Nuxt Minimal Starter
-
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+## Demo
+[Live Demo](https://front-end-vuejs-git-master-moomenazzams-projects.vercel.app/login)
 
 ## Setup
-
-Make sure to install dependencies:
-
+To install dependencies, run:
 ```bash
 npm install
 ```
 
 ## Development Server
-
 Start the development server on `http://localhost:3000`:
-
 ```bash
 npm run dev
 ```
 
 ## Production
-
-Build the application for production:
-
+Build and preview the production version:
 ```bash
 npm run build
-```
-
-Locally preview production build:
-
-```bash
 npm run preview
 ```
+For deployment details, check the [Nuxt documentation](https://nuxt.com/docs/getting-started/deployment).
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Images
+Place images related to the project in this section.
+
+![App Screenshot](https://github.com/user-attachments/assets/f98b5ed7-1560-4ce5-9ef5-a19196fca6fc)
