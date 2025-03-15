@@ -34,4 +34,4 @@ For deployment details, check the [Nuxt documentation](https://nuxt.com/docs/get
 ## Images
 Place images related to the project in this section.
 
-![App Screenshot](https://github.com/user-attachments/assets/f98b5ed7-1560-4ce5-9ef5-a19196fca6fc)
+![App Screenshot](https://github.com/user-attachments/assets/d1f945a5-e4b5-45cd-be8d-159422d74fa7)
