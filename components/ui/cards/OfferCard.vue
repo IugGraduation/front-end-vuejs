@@ -22,14 +22,21 @@
       <p class="description_offer mt-2">{{ descriptionFirstEightWords }}</p>
     </div>
     <!-- Overlay with edit button -->
+
     <div v-if="isHovered && isMyOffer" class="overlay">
       <button class="create_offer" @click="goToEditOffer">
         <span>Edit Offer</span>
+      </button>
+      <button class="create_offer ditales" @click="goToSeeDitales">
+        <span>See Ditales</span>
       </button>
     </div>
     <div v-if="isHovered && isMyPost" class="overlay">
       <button class="create_offer" @click="sendWhatsAppMessage">
         <span>Send WhatsApp Message</span>
+      </button>
+      <button class="create_offer ditales" @click="goToSeeDitales">
+        <span>See Ditales</span>
       </button>
     </div>
   </div>
@@ -128,6 +135,9 @@ const sendWhatsAppMessage = () => {
   )}`;
   window.open(url, "_blank");
 };
+const goToSeeDitales = () => {
+  router.push(`/offer/${props.id}`)
+};
 </script>
 
 <style scoped>
@@ -183,10 +193,7 @@ const sendWhatsAppMessage = () => {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-.card .overlay .create_offer:hover span {
-  /* background: rgb(var(--v-theme-primary)); */
-  /* color: rgb(var(--v-theme-white)); */
-}
+
 .card-skeleton {
   width: 100%;
   height: 100%;

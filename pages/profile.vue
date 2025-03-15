@@ -188,11 +188,6 @@ const onSaveInformations = async () => {
         formData.append("image", imageFile.value);
       }
 
-      // Debug FormData content
-      for (const [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
-
       const response = await authStore.updateProfile(formData);
 
       if (response.success) {
@@ -241,7 +236,6 @@ const onImageClick = () => {
 
 const onImageChange = (event) => {
   const file = event.target.files[0];
-  console.log(file);
 
   if (file) {
     // Validate file type

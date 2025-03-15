@@ -175,7 +175,7 @@
       </div>
       <!-- Add Offer Button -->
       <div class="add-offer-button" v-if="post.userId !== authStore.user?.uuid">
-        <NuxtLink :to="`/offer/${post.id}`">
+        <NuxtLink @click="goToAddOffer">
           <PrimaryBtn class="py-3 px-7 w-100">Add Offer</PrimaryBtn>
         </NuxtLink>
       </div>
@@ -191,6 +191,7 @@ import OfferCard from "../../components/ui/cards/OfferCard.vue";
 import { usePostStore } from "@/stores/posts";
 import { useToast } from "vue-toast-notification";
 import { useAuthStore } from "@/stores/auth";
+import { navigateTo } from "nuxt/app";
 
 // Access the current route
 const route = useRoute();
@@ -200,11 +201,12 @@ const toast = useToast();
 const imagesLoaded = ref<boolean>(false);
 const postHasImages = ref<boolean>(false);
 const post = ref<any>({});
-
+const postId = ref<string>();
 onMounted(async () => {
+  
   imagesLoaded.value = true;
-  const postId: string = route.params.id as string;
-  const response = await postsStore.fetchOnePost(postId);
+  postId.value = route.params.id as string;
+  const response = await postsStore.fetchOnePost(postId.value);
   postHasImages.value = response.data.image.length ? true : false;
   if (response.success) {
     post.value = response.data;
@@ -212,6 +214,16 @@ onMounted(async () => {
     toast.error("Error fetching post details.");
   }
 });
+
+const goToAddOffer = () => {
+
+  navigateTo({
+    path: "/offer/add",
+    query: {
+      postId: postId.value,
+    },
+  });
+};
 </script>
 
 <style scoped>

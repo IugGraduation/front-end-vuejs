@@ -365,8 +365,6 @@ export const usePostStore = defineStore("posts", {
     ): Promise<ApiResponse<any>> {
       const authStore = useAuthStore();
       const config = useRuntimeConfig();
-      console.log(categoryUuid);
-      
       try {
         const response: any = await $fetch(
           `${config.public.API_BASE_URL}/category/${categoryUuid}/posts`,

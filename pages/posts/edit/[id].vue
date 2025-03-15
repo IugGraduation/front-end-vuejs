@@ -222,10 +222,7 @@ const savePost = async () => {
     formData.append(`fcategory[${index}]`, category || ""); // Ensure category is not undefined
   });
 
-  // Debug FormData content
-  for (const [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
+
 
   // Update post
   const { success, message } = await postsStore.updatePost(formData);
