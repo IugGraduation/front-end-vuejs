@@ -75,6 +75,7 @@ onMounted(async () => {
   }
 });
 
+
 const category = computed(() => {
   return postStore.categories.find((cat) => cat.uuid === offer.value.category_uuid);
 });
