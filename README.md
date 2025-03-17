@@ -32,6 +32,5 @@ npm run preview
 For deployment details, check the [Nuxt documentation](https://nuxt.com/docs/getting-started/deployment).
 
 ## Images
-Place images related to the project in this section.
 
 ![App Screenshot](https://github.com/user-attachments/assets/d1f945a5-e4b5-45cd-be8d-159422d74fa7)
